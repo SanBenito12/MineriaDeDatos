@@ -272,7 +272,90 @@ def analizar_convergencia_red(modelo):
         pass
     return None
 
-def crear_visualizacion_redes(resultados, mejor_nombre, variables):
+def visualizar_arquitectura_red(modelo, variables_disponibles, nombre_red):
+    """Crear visualización de la arquitectura de la red neuronal"""
+    try:
+        import matplotlib.patches as patches
+        
+        # Obtener arquitectura
+        capas = [len(variables_disponibles)] + list(modelo.hidden_layer_sizes) + [len(modelo.classes_)]
+        
+        fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+        
+        # Configuración de posiciones
+        max_neuronas = max(capas)
+        espaciado_x = 2
+        espaciado_y = 0.8
+        
+        # Colores para cada capa
+        colores = ['lightgreen', 'lightblue', 'orange', 'purple', 'red']
+        
+        # Dibujar neuronas y conexiones
+        posiciones = {}
+        
+        for i, n_neuronas in enumerate(capas):
+            x = i * espaciado_x
+            # Centrar verticalmente
+            y_start = (max_neuronas - n_neuronas) * espaciado_y / 2
+            
+            posiciones[i] = []
+            
+            for j in range(n_neuronas):
+                y = y_start + j * espaciado_y
+                posiciones[i].append((x, y))
+                
+                # Dibujar neurona
+                circle = patches.Circle((x, y), 0.15, 
+                                      facecolor=colores[i % len(colores)], 
+                                      edgecolor='black', linewidth=1.5)
+                ax.add_patch(circle)
+                
+                # Etiquetas para entrada y salida
+                if i == 0 and j < len(variables_disponibles):  # Capa de entrada
+                    var_name = variables_disponibles[j][:6] + "..." if len(variables_disponibles[j]) > 6 else variables_disponibles[j]
+                    ax.text(x - 0.8, y, var_name, fontsize=9, ha='right', va='center')
+                elif i == len(capas) - 1:  # Capa de salida
+                    clases = ['Pequeña', 'Mediana', 'Grande', 'Muy Grande']
+                    if j < len(clases):
+                        ax.text(x + 0.8, y, clases[j], fontsize=9, ha='left', va='center')
+        
+        # Dibujar conexiones (solo algunas para claridad)
+        for i in range(len(capas) - 1):
+            for j, (x1, y1) in enumerate(posiciones[i]):
+                for k, (x2, y2) in enumerate(posiciones[i + 1]):
+                    # Dibujar solo algunas conexiones para no sobrecargar
+                    if j % max(1, len(posiciones[i]) // 5) == 0 and k % max(1, len(posiciones[i + 1]) // 5) == 0:
+                        ax.plot([x1 + 0.15, x2 - 0.15], [y1, y2], 
+                               'gray', alpha=0.3, linewidth=0.5)
+        
+        # Etiquetas de capas
+        etiquetas_capas = ['Entrada'] + [f'Oculta {i}' for i in range(1, len(capas)-1)] + ['Salida']
+        for i, etiqueta in enumerate(etiquetas_capas):
+            x = i * espaciado_x
+            ax.text(x, max_neuronas * espaciado_y * 0.6, etiqueta, 
+                   fontsize=12, fontweight='bold', ha='center')
+            ax.text(x, max_neuronas * espaciado_y * 0.55, f'({capas[i]} neuronas)', 
+                   fontsize=10, ha='center', style='italic')
+        
+        ax.set_xlim(-1.5, (len(capas) - 1) * espaciado_x + 1.5)
+        ax.set_ylim(-0.5, max_neuronas * espaciado_y)
+        ax.set_aspect('equal')
+        ax.axis('off')
+        
+        plt.title(f'🧠 ARQUITECTURA DE RED NEURONAL\n{nombre_red}', 
+                 fontsize=16, fontweight='bold', pad=20)
+        
+        # Información adicional
+        total_params = sum([capas[i] * capas[i+1] for i in range(len(capas)-1)]) + sum(capas[1:])
+        plt.figtext(0.5, 0.02, f'Total de parámetros: {total_params:,} | Activación: {modelo.activation} | Solver: L-BFGS', 
+                   ha='center', fontsize=11, style='italic')
+        
+        plt.tight_layout()
+        return fig
+        
+    except Exception as e:
+        print(f"⚠️ Error creando visualización de arquitectura: {e}")
+        return None
     """Crear visualizaciones optimizadas para redes neuronales"""
     try:
         # Filtrar solo resultados exitosos
