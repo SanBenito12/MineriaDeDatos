@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -30,7 +31,7 @@ def mostrar_banner():
     banner = f"""
 {Colores.CYAN}╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                                                              ║
-║  {Colores.NEGRITA}🧠 SISTEMA DE MINERÍA DE DATOS - CLASIFICACIÓN SUPERVISADA 🧠{Colores.FIN}{Colores.CYAN}           ║
+║  {Colores.NEGRITA}🧠 SISTEMA COMPLETO DE MINERÍA DE DATOS - IA AVANZADA 🧠{Colores.FIN}{Colores.CYAN}              ║
 ║                                                                              ║
 ║  {Colores.BLANCO}Universidad: [Tu Universidad]{Colores.CYAN}                                            ║
 ║  {Colores.BLANCO}Proyecto: Análisis Demográfico con Técnicas de IA{Colores.CYAN}                      ║
@@ -39,18 +40,19 @@ def mostrar_banner():
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝{Colores.FIN}
 
-{Colores.AMARILLO}📊 OBJETIVO: Clasificar comunidades por tamaño poblacional usando 7 técnicas de IA{Colores.FIN}
-{Colores.VERDE}🎯 CATEGORÍAS: Pequeña (≤1K) | Mediana (≤5K) | Grande (≤20K) | Muy Grande (>20K){Colores.FIN}
+{Colores.AMARILLO}📊 SISTEMA COMPLETO: Supervisadas + No Supervisadas{Colores.FIN}
+{Colores.VERDE}🎯 CLASIFICACIÓN: 7 técnicas | CLUSTERING: 3 técnicas | PREDICCIÓN: 3 técnicas{Colores.FIN}
 """
     print(banner)
 
 def mostrar_menu_principal():
-    """Mostrar el menú principal con todas las opciones"""
+    """Mostrar el menú principal con todas las opciones actualizadas"""
     menu = f"""
 {Colores.NEGRITA}{Colores.AZUL}═══════════════════════════════════════════════════════════════════════════════
                            🔬 TÉCNICAS DISPONIBLES
 ═══════════════════════════════════════════════════════════════════════════════{Colores.FIN}
 
+{Colores.VERDE}{Colores.NEGRITA}📚 TÉCNICAS SUPERVISADAS (CLASIFICACIÓN):{Colores.FIN}
 {Colores.VERDE}1.{Colores.FIN} {Colores.NEGRITA}🌳 Árboles de Decisión{Colores.FIN}
    └─ Clasificación interpretable con reglas de decisión jerárquicas
 
@@ -72,13 +74,31 @@ def mostrar_menu_principal():
 {Colores.VERDE}7.{Colores.FIN} {Colores.NEGRITA}🧬 Técnicas Genéticas{Colores.FIN}
    └─ Optimización evolutiva de características e hiperparámetros
 
-{Colores.MORADO}8.{Colores.FIN} {Colores.NEGRITA}🚀 Ejecutar TODAS las técnicas{Colores.FIN}
-   └─ Ejecución completa secuencial y comparación automática
+{Colores.CYAN}{Colores.NEGRITA}🔍 TÉCNICAS NO SUPERVISADAS (CLUSTERING):{Colores.FIN}
+{Colores.CYAN}8.{Colores.FIN} {Colores.NEGRITA}📈 Clustering Numérico{Colores.FIN}
+   └─ K-Means, Clustering Jerárquico y DBSCAN para grupos similares
 
-{Colores.CYAN}9.{Colores.FIN} {Colores.NEGRITA}📊 Ver Resultados y Comparar{Colores.FIN}
-   └─ Revisar reportes, gráficos y comparación de rendimiento
+{Colores.CYAN}9.{Colores.FIN} {Colores.NEGRITA}🧠 Clustering Conceptual{Colores.FIN}
+   └─ Agrupación interpretable basada en conceptos demográficos
 
-{Colores.AMARILLO}10.{Colores.FIN} {Colores.NEGRITA}🔧 Configuración y Diagnóstico{Colores.FIN}
+{Colores.CYAN}10.{Colores.FIN} {Colores.NEGRITA}🎯 Clustering Probabilístico{Colores.FIN}
+    └─ Gaussian Mixture Models con análisis de incertidumbre
+
+{Colores.MORADO}{Colores.NEGRITA}🚀 EJECUCIÓN MASIVA:{Colores.FIN}
+{Colores.MORADO}11.{Colores.FIN} {Colores.NEGRITA}🔥 Ejecutar TODAS las Supervisadas{Colores.FIN}
+    └─ Ejecución completa de las 7 técnicas de clasificación
+
+{Colores.MORADO}12.{Colores.FIN} {Colores.NEGRITA}🌟 Ejecutar TODOS los Clustering{Colores.FIN}
+    └─ Ejecución completa de las 3 técnicas de clustering
+
+{Colores.MORADO}13.{Colores.FIN} {Colores.NEGRITA}💥 Ejecutar TODO EL SISTEMA{Colores.FIN}
+    └─ Ejecución completa: 7 Supervisadas + 3 Clustering (10 técnicas)
+
+{Colores.AMARILLO}{Colores.NEGRITA}📊 ANÁLISIS Y GESTIÓN:{Colores.FIN}
+{Colores.AMARILLO}14.{Colores.FIN} {Colores.NEGRITA}📊 Ver Resultados y Comparar{Colores.FIN}
+    └─ Revisar reportes, gráficos y comparación de rendimiento
+
+{Colores.AMARILLO}15.{Colores.FIN} {Colores.NEGRITA}🔧 Configuración y Diagnóstico{Colores.FIN}
     └─ Verificar sistema, rutas, datos y dependencias
 
 {Colores.ROJO}0.{Colores.FIN} {Colores.NEGRITA}❌ Salir del Sistema{Colores.FIN}
@@ -113,7 +133,8 @@ def verificar_archivos():
         'reportes': '/home/sedc/Proyectos/MineriaDeDatos/results/reportes/'
     }
     
-    archivos_tecnicas = {
+    # Técnicas Supervisadas
+    archivos_supervisadas = {
         'Árboles de Decisión': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/01_Arboles_Decision/1_arboles_decision.py',
         'Inducción de Reglas': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/02_Induccion_Reglas/2_induccion_reglas.py',
         'Clasificación Bayesiana': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/03_Bayesiana/3_clasificacion_bayesiana.py',
@@ -123,7 +144,14 @@ def verificar_archivos():
         'Técnicas Genéticas': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/07_Tecnicas_Geneticas/7_tecnicas_geneticas.py'
     }
     
-    print(f"{Colores.AMARILLO}🔍 Verificando sistema...{Colores.FIN}")
+    # Técnicas No Supervisadas
+    archivos_clustering = {
+        'Clustering Numérico': '/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/01_Numerico/clustering_numerico.py',
+        'Clustering Conceptual': '/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/02_Conceptual/clustering_conceptual.py',
+        'Clustering Probabilístico': '/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/03_Probabilistico/clustering_probabilistico.py'
+    }
+    
+    print(f"{Colores.AMARILLO}🔍 Verificando sistema completo...{Colores.FIN}")
     
     # Verificar directorios
     for nombre, ruta in rutas_requeridas.items():
@@ -138,34 +166,45 @@ def verificar_archivos():
                 except Exception as e:
                     print(f"     {Colores.ROJO}❌ Error creando carpeta: {e}{Colores.FIN}")
     
-    # Verificar archivos de técnicas
-    print(f"\n{Colores.AMARILLO}🔍 Verificando archivos de técnicas...{Colores.FIN}")
-    tecnicas_disponibles = 0
-    for nombre, ruta in archivos_tecnicas.items():
+    # Verificar técnicas supervisadas
+    print(f"\n{Colores.AMARILLO}🔍 Verificando técnicas supervisadas...{Colores.FIN}")
+    supervisadas_disponibles = 0
+    for nombre, ruta in archivos_supervisadas.items():
         if os.path.exists(ruta):
             print(f"  ✅ {nombre}: {Colores.VERDE}OK{Colores.FIN}")
-            tecnicas_disponibles += 1
+            supervisadas_disponibles += 1
         else:
             print(f"  ❌ {nombre}: {Colores.ROJO}NO ENCONTRADO{Colores.FIN}")
-            print(f"     {Colores.AMARILLO}Esperado en: {ruta}{Colores.FIN}")
+    
+    # Verificar técnicas de clustering
+    print(f"\n{Colores.AMARILLO}🔍 Verificando técnicas de clustering...{Colores.FIN}")
+    clustering_disponibles = 0
+    for nombre, ruta in archivos_clustering.items():
+        if os.path.exists(ruta):
+            print(f"  ✅ {nombre}: {Colores.VERDE}OK{Colores.FIN}")
+            clustering_disponibles += 1
+        else:
+            print(f"  ❌ {nombre}: {Colores.ROJO}NO ENCONTRADO{Colores.FIN}")
     
     datos_ok = os.path.exists(rutas_requeridas['datos'])
     
     print(f"\n{Colores.CYAN}📊 Resumen del sistema:")
     print(f"  Datos principales: {'✅' if datos_ok else '❌'}")
-    print(f"  Técnicas disponibles: {tecnicas_disponibles}/7{Colores.FIN}")
+    print(f"  Técnicas supervisadas: {supervisadas_disponibles}/7")
+    print(f"  Técnicas clustering: {clustering_disponibles}/3")
+    print(f"  Total técnicas: {supervisadas_disponibles + clustering_disponibles}/10{Colores.FIN}")
     
-    return datos_ok, tecnicas_disponibles
+    return datos_ok, supervisadas_disponibles, clustering_disponibles
 
-def ejecutar_tecnica(numero, nombre_tecnica, descripcion):
-    """Ejecutar una técnica específica"""
+def ejecutar_tecnica_supervisada(numero, nombre_tecnica, descripcion):
+    """Ejecutar una técnica supervisada específica"""
     print(f"\n{Colores.CYAN}{'='*80}")
-    print(f"🚀 EJECUTANDO: {nombre_tecnica}")
+    print(f"🚀 EJECUTANDO TÉCNICA SUPERVISADA: {nombre_tecnica}")
     print(f"📝 {descripcion}")
     print(f"{'='*80}{Colores.FIN}\n")
     
-    # Mapeo de técnicas a sus archivos
-    archivos_tecnicas = {
+    # Mapeo de técnicas supervisadas
+    archivos_supervisadas = {
         1: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/01_Arboles_Decision/1_arboles_decision.py', 'ejecutar_arboles_decision'),
         2: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/02_Induccion_Reglas/2_induccion_reglas.py', 'ejecutar_induccion_reglas'),
         3: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/03_Bayesiana/3_clasificacion_bayesiana.py', 'ejecutar_clasificacion_bayesiana'),
@@ -175,11 +214,31 @@ def ejecutar_tecnica(numero, nombre_tecnica, descripcion):
         7: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/07_Tecnicas_Geneticas/7_tecnicas_geneticas.py', 'ejecutar_tecnicas_geneticas')
     }
     
+    return ejecutar_tecnica_generica(numero, archivos_supervisadas, nombre_tecnica)
+
+def ejecutar_tecnica_clustering(numero, nombre_tecnica, descripcion):
+    """Ejecutar una técnica de clustering específica"""
+    print(f"\n{Colores.CYAN}{'='*80}")
+    print(f"🔍 EJECUTANDO TÉCNICA DE CLUSTERING: {nombre_tecnica}")
+    print(f"📝 {descripcion}")
+    print(f"{'='*80}{Colores.FIN}\n")
+    
+    # Mapeo de técnicas de clustering (ajustar números)
+    archivos_clustering = {
+        8: ('/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/01_Numerico/clustering_numerico.py', 'ejecutar_clustering_numerico'),
+        9: ('/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/02_Conceptual/clustering_conceptual.py', 'ejecutar_clustering_conceptual'),
+        10: ('/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/03_Probabilistico/clustering_probabilistico.py', 'ejecutar_clustering_probabilistico')
+    }
+    
+    return ejecutar_tecnica_generica(numero, archivos_clustering, nombre_tecnica)
+
+def ejecutar_tecnica_generica(numero, archivos_dict, nombre_tecnica):
+    """Función genérica para ejecutar cualquier técnica"""
     inicio = time.time()
     
     try:
-        if numero in archivos_tecnicas:
-            archivo_path, nombre_funcion = archivos_tecnicas[numero]
+        if numero in archivos_dict:
+            archivo_path, nombre_funcion = archivos_dict[numero]
             
             # Verificar que el archivo existe
             if not os.path.exists(archivo_path):
@@ -225,9 +284,9 @@ def ejecutar_tecnica(numero, nombre_tecnica, descripcion):
         print(f"{'='*60}{Colores.FIN}")
         return False
 
-def ejecutar_todas_las_tecnicas():
-    """Ejecutar todas las técnicas secuencialmente"""
-    tecnicas_info = [
+def ejecutar_todas_supervisadas():
+    """Ejecutar todas las técnicas supervisadas"""
+    tecnicas_supervisadas = [
         (1, "🌳 Árboles de Decisión", "Clasificación con reglas interpretables"),
         (2, "📏 Inducción de Reglas", "Generación de reglas IF-THEN"),
         (3, "🎲 Clasificación Bayesiana", "Clasificación probabilística"),
@@ -237,7 +296,81 @@ def ejecutar_todas_las_tecnicas():
         (7, "🧬 Técnicas Genéticas", "Optimización evolutiva")
     ]
     
-    print(f"\n{Colores.MORADO}{Colores.NEGRITA}🚀 EJECUTANDO TODAS LAS TÉCNICAS DE CLASIFICACIÓN{Colores.FIN}")
+    return ejecutar_conjunto_tecnicas(tecnicas_supervisadas, "SUPERVISADAS", ejecutar_tecnica_supervisada)
+
+def ejecutar_todos_clustering():
+    """Ejecutar todas las técnicas de clustering"""
+    tecnicas_clustering = [
+        (8, "📈 Clustering Numérico", "K-Means, Jerárquico, DBSCAN"),
+        (9, "🧠 Clustering Conceptual", "Agrupación interpretable"),
+        (10, "🎯 Clustering Probabilístico", "Gaussian Mixture Models")
+    ]
+    
+    return ejecutar_conjunto_tecnicas(tecnicas_clustering, "CLUSTERING", ejecutar_tecnica_clustering)
+
+def ejecutar_sistema_completo():
+    """Ejecutar todo el sistema: supervisadas + clustering"""
+    print(f"\n{Colores.MORADO}{Colores.NEGRITA}💥 EJECUTANDO TODO EL SISTEMA DE MINERÍA DE DATOS{Colores.FIN}")
+    print(f"{Colores.AMARILLO}⏱️  Esto puede tomar 45-60 minutos dependiendo de tu hardware...{Colores.FIN}")
+    print(f"{Colores.CYAN}📊 Total: 7 Supervisadas + 3 Clustering = 10 técnicas{Colores.FIN}")
+    
+    # Confirmar ejecución
+    confirmacion = input(f"\n{Colores.AMARILLO}¿Deseas continuar con la ejecución COMPLETA? (s/N): {Colores.FIN}").strip().lower()
+    if confirmacion not in ['s', 'si', 'sí', 'y', 'yes']:
+        print(f"{Colores.AMARILLO}❌ Ejecución cancelada por el usuario{Colores.FIN}")
+        return
+    
+    tiempo_total_inicio = time.time()
+    
+    # Ejecutar supervisadas
+    print(f"\n{Colores.VERDE}{'='*80}")
+    print(f"🚀 FASE 1: TÉCNICAS SUPERVISADAS (7/10)")
+    print(f"{'='*80}{Colores.FIN}")
+    
+    resultado_supervisadas = ejecutar_todas_supervisadas()
+    
+    # Pausa entre fases
+    print(f"\n{Colores.AMARILLO}⏳ Preparando fase de clustering en 5 segundos...{Colores.FIN}")
+    time.sleep(5)
+    
+    # Ejecutar clustering
+    print(f"\n{Colores.CYAN}{'='*80}")
+    print(f"🔍 FASE 2: TÉCNICAS DE CLUSTERING (3/10)")
+    print(f"{'='*80}{Colores.FIN}")
+    
+    resultado_clustering = ejecutar_todos_clustering()
+    
+    # Resumen final
+    tiempo_total_fin = time.time()
+    duracion_total = tiempo_total_fin - tiempo_total_inicio
+    
+    exitosas_supervisadas = sum(resultado_supervisadas.values()) if resultado_supervisadas else 0
+    exitosas_clustering = sum(resultado_clustering.values()) if resultado_clustering else 0
+    total_exitosas = exitosas_supervisadas + exitosas_clustering
+    
+    print(f"\n{Colores.MORADO}{Colores.NEGRITA}{'='*80}")
+    print("💥 RESUMEN SISTEMA COMPLETO DE MINERÍA DE DATOS")
+    print(f"{'='*80}{Colores.FIN}")
+    
+    print(f"✅ Supervisadas exitosas: {exitosas_supervisadas}/7")
+    print(f"✅ Clustering exitosas: {exitosas_clustering}/3")
+    print(f"🏆 Total exitosas: {total_exitosas}/10")
+    print(f"⏱️ Tiempo total: {Colores.AMARILLO}{duracion_total/60:.1f} minutos{Colores.FIN}")
+    
+    if total_exitosas == 10:
+        print(f"\n{Colores.VERDE}🎉 ¡SISTEMA COMPLETO EJECUTADO AL 100%!")
+        print(f"🏆 Las 10 técnicas de IA completadas exitosamente")
+        print(f"💼 Tu proyecto de minería de datos está COMPLETO{Colores.FIN}")
+    elif total_exitosas >= 7:
+        print(f"\n{Colores.AMARILLO}⚠️ Sistema mayormente completado ({total_exitosas}/10)")
+        print(f"💡 Revisa los errores y ejecuta las técnicas faltantes{Colores.FIN}")
+    else:
+        print(f"\n{Colores.ROJO}❌ Sistema parcialmente completado ({total_exitosas}/10)")
+        print(f"🔧 Revisa la configuración y vuelve a intentar{Colores.FIN}")
+
+def ejecutar_conjunto_tecnicas(tecnicas_lista, tipo_nombre, funcion_ejecutar):
+    """Función genérica para ejecutar un conjunto de técnicas"""
+    print(f"\n{Colores.MORADO}{Colores.NEGRITA}🚀 EJECUTANDO TODAS LAS TÉCNICAS {tipo_nombre}{Colores.FIN}")
     print(f"{Colores.AMARILLO}⏱️  Esto puede tomar 15-30 minutos dependiendo de tu hardware...{Colores.FIN}")
     
     # Confirmar ejecución
@@ -246,17 +379,17 @@ def ejecutar_todas_las_tecnicas():
         print(f"{Colores.AMARILLO}❌ Ejecución cancelada por el usuario{Colores.FIN}")
         return
     
-    print(f"\n{Colores.VERDE}✅ Iniciando ejecución completa...{Colores.FIN}\n")
+    print(f"\n{Colores.VERDE}✅ Iniciando ejecución de {len(tecnicas_lista)} técnicas...{Colores.FIN}\n")
     
     resultados = {}
     tiempo_total_inicio = time.time()
     
-    for i, (num, nombre, desc) in enumerate(tecnicas_info, 1):
+    for i, (num, nombre, desc) in enumerate(tecnicas_lista, 1):
         print(f"{Colores.CYAN}{'─'*80}")
-        print(f"[{i}/7] Ejecutando: {nombre}")
+        print(f"[{i}/{len(tecnicas_lista)}] Ejecutando: {nombre}")
         print(f"{'─'*80}{Colores.FIN}")
         
-        exito = ejecutar_tecnica(num, nombre, desc)
+        exito = funcion_ejecutar(num, nombre, desc)
         resultados[nombre] = exito
         
         if exito:
@@ -265,39 +398,33 @@ def ejecutar_todas_las_tecnicas():
             print(f"{Colores.ROJO}❌ {nombre} falló durante la ejecución{Colores.FIN}")
         
         # Pausa entre técnicas
-        if i < len(tecnicas_info):
+        if i < len(tecnicas_lista):
             print(f"\n{Colores.AMARILLO}⏳ Preparando siguiente técnica en 3 segundos...{Colores.FIN}")
             time.sleep(3)
     
     tiempo_total_fin = time.time()
     duracion_total = tiempo_total_fin - tiempo_total_inicio
     
-    # Resumen final
-    print(f"\n{Colores.MORADO}{Colores.NEGRITA}{'='*80}")
-    print("📊 RESUMEN DE EJECUCIÓN COMPLETA")
-    print(f"{'='*80}{Colores.FIN}")
-    
+    # Resumen
     exitosas = sum(resultados.values())
     fallidas = len(resultados) - exitosas
     
-    print(f"✅ Técnicas exitosas: {Colores.VERDE}{exitosas}/7{Colores.FIN}")
-    print(f"❌ Técnicas fallidas: {Colores.ROJO}{fallidas}/7{Colores.FIN}")
+    print(f"\n{Colores.MORADO}{Colores.NEGRITA}{'='*80}")
+    print(f"📊 RESUMEN TÉCNICAS {tipo_nombre}")
+    print(f"{'='*80}{Colores.FIN}")
+    
+    print(f"✅ Técnicas exitosas: {Colores.VERDE}{exitosas}/{len(tecnicas_lista)}{Colores.FIN}")
+    print(f"❌ Técnicas fallidas: {Colores.ROJO}{fallidas}/{len(tecnicas_lista)}{Colores.FIN}")
     print(f"⏱️  Tiempo total: {Colores.AMARILLO}{duracion_total/60:.1f} minutos{Colores.FIN}")
     
-    print(f"\n{Colores.CYAN}📁 ARCHIVOS GENERADOS:{Colores.FIN}")
-    print("   📊 Gráficos: /results/graficos/")
-    print("   🤖 Modelos: /results/modelos/")
-    print("   📄 Reportes: /results/reportes/")
-    
-    if exitosas == 7:
-        print(f"\n{Colores.VERDE}🎉 ¡TODAS LAS TÉCNICAS EJECUTADAS EXITOSAMENTE!")
-        print(f"🏆 Tu proyecto de minería de datos está completo{Colores.FIN}")
+    if exitosas == len(tecnicas_lista):
+        print(f"\n{Colores.VERDE}🎉 ¡TODAS LAS TÉCNICAS {tipo_nombre} COMPLETADAS!")
+        print(f"🏆 Ejecución perfecta{Colores.FIN}")
     elif exitosas > 0:
-        print(f"\n{Colores.AMARILLO}⚠️  Ejecución parcial completada")
-        print(f"💡 Revisa los errores y vuelve a ejecutar las técnicas fallidas{Colores.FIN}")
-    else:
-        print(f"\n{Colores.ROJO}❌ No se completó ninguna técnica exitosamente")
-        print(f"🔧 Revisa la configuración del sistema y los archivos{Colores.FIN}")
+        print(f"\n{Colores.AMARILLO}⚠️ Ejecución parcial ({exitosas}/{len(tecnicas_lista)})")
+        print(f"💡 Revisa los errores y vuelve a ejecutar las fallidas{Colores.FIN}")
+    
+    return resultados
 
 def ver_resultados_guardados():
     """Mostrar información detallada sobre resultados guardados"""
@@ -352,19 +479,61 @@ def ver_resultados_guardados():
         print(f"  📁 Total archivos: {total_archivos}")
         print(f"  💾 Espacio utilizado: {total_tamaño/1024/1024:.1f} MB{Colores.FIN}")
         
-        # Buscar técnicas completadas
-        tecnicas_completadas = []
+        # Detectar técnicas completadas
+        print(f"\n{Colores.VERDE}✅ TÉCNICAS COMPLETADAS DETECTADAS:")
+        
+        # Supervisadas
+        tecnicas_supervisadas_completadas = []
+        tecnicas_clustering_completadas = []
+        
         graficos_path = rutas['Gráficos']
         if os.path.exists(graficos_path):
-            for archivo in os.listdir(graficos_path):
-                if '_clasificacion.png' in archivo:
-                    tecnica = archivo.replace('_clasificacion.png', '').replace('_', ' ').title()
-                    tecnicas_completadas.append(tecnica)
+            archivos_graficos = os.listdir(graficos_path)
+            
+            # Detectar supervisadas
+            patrones_supervisadas = {
+                'arboles_decision_clasificacion.png': '🌳 Árboles de Decisión',
+                'induccion_reglas.png': '📏 Inducción de Reglas',
+                'clasificacion_bayesiana.png': '🎲 Clasificación Bayesiana',
+                'clasificacion_knn.png': '👥 Basado en Ejemplares',
+                'redes_neuronas_clasificacion.png': '🧠 Redes de Neuronas',
+                'logica_borrosa_clasificacion.png': '🌫️ Lógica Borrosa',
+                'tecnicas_geneticas_clasificacion.png': '🧬 Técnicas Genéticas'
+            }
+            
+            # Detectar clustering
+            patrones_clustering = {
+                'clustering_numerico.png': '📈 Clustering Numérico',
+                'clustering_conceptual.png': '🧠 Clustering Conceptual',
+                'clustering_probabilistico.png': '🎯 Clustering Probabilístico'
+            }
+            
+            for archivo in archivos_graficos:
+                if archivo in patrones_supervisadas:
+                    tecnicas_supervisadas_completadas.append(patrones_supervisadas[archivo])
+                elif archivo in patrones_clustering:
+                    tecnicas_clustering_completadas.append(patrones_clustering[archivo])
         
-        if tecnicas_completadas:
-            print(f"\n{Colores.VERDE}✅ Técnicas completadas detectadas:")
-            for tecnica in tecnicas_completadas:
-                print(f"  🎯 {tecnica}{Colores.FIN}")
+        # Mostrar técnicas completadas
+        print(f"  {Colores.VERDE}📚 Supervisadas ({len(tecnicas_supervisadas_completadas)}/7):{Colores.FIN}")
+        for tecnica in tecnicas_supervisadas_completadas:
+            print(f"    ✅ {tecnica}")
+        
+        print(f"  {Colores.CYAN}🔍 Clustering ({len(tecnicas_clustering_completadas)}/3):{Colores.FIN}")
+        for tecnica in tecnicas_clustering_completadas:
+            print(f"    ✅ {tecnica}")
+        
+        total_completadas = len(tecnicas_supervisadas_completadas) + len(tecnicas_clustering_completadas)
+        print(f"\n  {Colores.MORADO}🏆 Total completadas: {total_completadas}/10 técnicas{Colores.FIN}")
+        
+        if total_completadas == 10:
+            print(f"  {Colores.VERDE}🎉 ¡SISTEMA COMPLETO AL 100%!{Colores.FIN}")
+        elif total_completadas >= 7:
+            print(f"  {Colores.AMARILLO}⚠️ Sistema mayormente completo{Colores.FIN}")
+        elif total_completadas >= 3:
+            print(f"  {Colores.CYAN}🔧 Sistema parcialmente completo{Colores.FIN}")
+        else:
+            print(f"  {Colores.ROJO}📝 Pocas técnicas completadas{Colores.FIN}")
 
 def configuracion_sistema():
     """Mostrar configuración detallada del sistema"""
@@ -389,7 +558,8 @@ def configuracion_sistema():
         'sklearn': 'Machine Learning',
         'matplotlib': 'Gráficos básicos',
         'seaborn': 'Gráficos estadísticos',
-        'scipy': 'Computación científica'
+        'scipy': 'Computación científica',
+        'joblib': 'Serialización de modelos'
     }
     
     for lib, descripcion in librerias_requeridas.items():
@@ -400,9 +570,9 @@ def configuracion_sistema():
         except ImportError:
             print(f"  ❌ {lib}: {Colores.ROJO}NO instalado - {descripcion}{Colores.FIN}")
     
-    # Verificar estructura de archivos
-    print(f"\n{Colores.NEGRITA}📁 Estructura de Directorios:{Colores.FIN}")
-    datos_ok, tecnicas_disponibles = verificar_archivos()
+    # Verificar estructura completa
+    print(f"\n{Colores.NEGRITA}📁 Estructura del Sistema:{Colores.FIN}")
+    datos_ok, supervisadas_ok, clustering_ok = verificar_archivos()
     
     # Verificar espacio en disco
     print(f"\n{Colores.NEGRITA}💾 Espacio en Disco:{Colores.FIN}")
@@ -418,39 +588,52 @@ def configuracion_sistema():
     except Exception as e:
         print(f"  ⚠️ Error obteniendo info de disco: {e}")
     
-    # Recomendaciones
+    # Diagnóstico y recomendaciones
     print(f"\n{Colores.NEGRITA}💡 Diagnóstico y Recomendaciones:{Colores.FIN}")
     
     if not datos_ok:
         print(f"  {Colores.ROJO}❌ CRÍTICO: Archivo de datos no encontrado{Colores.FIN}")
         print(f"    💡 Verifica que el archivo CSV esté en: /home/sedc/Proyectos/MineriaDeDatos/data/")
     
-    if tecnicas_disponibles < 7:
-        print(f"  {Colores.AMARILLO}⚠️ ADVERTENCIA: Solo {tecnicas_disponibles}/7 técnicas disponibles{Colores.FIN}")
-        print(f"    💡 Asegúrate de tener todos los archivos .py en sus carpetas correspondientes")
+    if supervisadas_ok < 7:
+        print(f"  {Colores.AMARILLO}⚠️ ADVERTENCIA: Solo {supervisadas_ok}/7 técnicas supervisadas disponibles{Colores.FIN}")
+        print(f"    💡 Completa los archivos faltantes en /01_Supervisadas/02_Clasificacion/")
     
-    if tecnicas_disponibles == 7 and datos_ok:
+    if clustering_ok < 3:
+        print(f"  {Colores.AMARILLO}⚠️ ADVERTENCIA: Solo {clustering_ok}/3 técnicas de clustering disponibles{Colores.FIN}")
+        print(f"    💡 Completa los archivos faltantes en /02_No_Supervisadas/01_Clustering/")
+    
+    total_tecnicas = supervisadas_ok + clustering_ok
+    if total_tecnicas == 10 and datos_ok:
         print(f"  {Colores.VERDE}✅ EXCELENTE: Sistema completamente configurado y listo{Colores.FIN}")
         print(f"    🚀 Puedes ejecutar cualquier técnica sin problemas")
+        print(f"    💥 Sistema completo: 10/10 técnicas disponibles")
+    elif total_tecnicas >= 7:
+        print(f"  {Colores.AMARILLO}👍 BUENO: Sistema mayormente configurado ({total_tecnicas}/10){Colores.FIN}")
+        print(f"    🔧 Completa las técnicas faltantes para funcionalidad total")
+    else:
+        print(f"  {Colores.ROJO}🔧 INCOMPLETO: Sistema requiere configuración ({total_tecnicas}/10){Colores.FIN}")
+        print(f"    📋 Revisa los archivos faltantes y completa la instalación")
 
 def main():
-    """Función principal del menú"""
+    """Función principal del menú actualizado"""
     while True:
         limpiar_pantalla()
         mostrar_banner()
         mostrar_menu_principal()
         
         try:
-            opcion = input(f"{Colores.AMARILLO}👉 Selecciona una opción (0-10): {Colores.FIN}").strip()
+            opcion = input(f"{Colores.AMARILLO}👉 Selecciona una opción (0-15): {Colores.FIN}").strip()
             
             if opcion == '0':
-                print(f"\n{Colores.VERDE}👋 ¡Gracias por usar el Sistema de Minería de Datos!")
-                print(f"🎓 ¡Éxito en tu proyecto académico!")
-                print(f"📧 Cualquier duda, revisa los reportes generados{Colores.FIN}\n")
+                print(f"\n{Colores.VERDE}👋 ¡Gracias por usar el Sistema Completo de Minería de Datos!")
+                print(f"🎓 ¡Éxito en tu proyecto de IA y Machine Learning!")
+                print(f"📧 Revisa los reportes y gráficos generados para tu análisis{Colores.FIN}\n")
                 break
                 
+            # Técnicas supervisadas (1-7)
             elif opcion in ['1', '2', '3', '4', '5', '6', '7']:
-                tecnicas_nombres = {
+                tecnicas_supervisadas = {
                     '1': ("🌳 Árboles de Decisión", "Clasificación interpretable con reglas de decisión"),
                     '2': ("📏 Inducción de Reglas", "Generación automática de reglas IF-THEN"),
                     '3': ("🎲 Clasificación Bayesiana", "Clasificación probabilística usando teorema de Bayes"),
@@ -460,20 +643,39 @@ def main():
                     '7': ("🧬 Técnicas Genéticas", "Optimización evolutiva de características e hiperparámetros")
                 }
                 
-                nombre, desc = tecnicas_nombres[opcion]
-                ejecutar_tecnica(int(opcion), nombre, desc)
+                nombre, desc = tecnicas_supervisadas[opcion]
+                ejecutar_tecnica_supervisada(int(opcion), nombre, desc)
+            
+            # Técnicas de clustering (8-10)
+            elif opcion in ['8', '9', '10']:
+                tecnicas_clustering = {
+                    '8': ("📈 Clustering Numérico", "K-Means, Clustering Jerárquico y DBSCAN"),
+                    '9': ("🧠 Clustering Conceptual", "Agrupación interpretable basada en conceptos demográficos"),
+                    '10': ("🎯 Clustering Probabilístico", "Gaussian Mixture Models con análisis de incertidumbre")
+                }
                 
-            elif opcion == '8':
-                ejecutar_todas_las_tecnicas()
+                nombre, desc = tecnicas_clustering[opcion]
+                ejecutar_tecnica_clustering(int(opcion), nombre, desc)
+            
+            # Ejecución masiva
+            elif opcion == '11':
+                ejecutar_todas_supervisadas()
                 
-            elif opcion == '9':
+            elif opcion == '12':
+                ejecutar_todos_clustering()
+                
+            elif opcion == '13':
+                ejecutar_sistema_completo()
+                
+            # Análisis y gestión
+            elif opcion == '14':
                 ver_resultados_guardados()
                 
-            elif opcion == '10':
+            elif opcion == '15':
                 configuracion_sistema()
                 
             else:
-                print(f"{Colores.ROJO}❌ Opción inválida. Por favor selecciona un número del 0 al 10.{Colores.FIN}")
+                print(f"{Colores.ROJO}❌ Opción inválida. Por favor selecciona un número del 0 al 15.{Colores.FIN}")
                 time.sleep(2)
             
             if opcion != '0':
@@ -491,23 +693,25 @@ def main():
 
 if __name__ == "__main__":
     # Verificar sistema antes de iniciar
-    print(f"{Colores.CYAN}🔍 Inicializando Sistema de Minería de Datos...{Colores.FIN}")
+    print(f"{Colores.CYAN}🔍 Inicializando Sistema Completo de Minería de Datos...{Colores.FIN}")
     time.sleep(1)
     
-    datos_ok, tecnicas_disponibles = verificar_archivos()
+    datos_ok, supervisadas_ok, clustering_ok = verificar_archivos()
+    total_tecnicas = supervisadas_ok + clustering_ok
     
-    if datos_ok and tecnicas_disponibles >= 1:
+    if datos_ok and total_tecnicas >= 1:
         print(f"\n{Colores.VERDE}✅ Sistema inicializado correctamente")
-        print(f"📊 Datos: OK | Técnicas: {tecnicas_disponibles}/7{Colores.FIN}")
+        print(f"📊 Datos: OK | Supervisadas: {supervisadas_ok}/7 | Clustering: {clustering_ok}/3")
+        print(f"🏆 Total técnicas: {total_tecnicas}/10{Colores.FIN}")
         time.sleep(2)
         main()
     else:
         print(f"\n{Colores.ROJO}❌ Sistema no está completamente configurado")
-        print(f"📊 Datos: {'OK' if datos_ok else 'FALTA'} | Técnicas: {tecnicas_disponibles}/7{Colores.FIN}")
+        print(f"📊 Datos: {'OK' if datos_ok else 'FALTA'} | Técnicas: {total_tecnicas}/10{Colores.FIN}")
         
         continuar = input(f"\n{Colores.AMARILLO}¿Deseas continuar de todas formas? (s/N): {Colores.FIN}").strip().lower()
         if continuar in ['s', 'si', 'sí', 'y', 'yes']:
             main()
         else:
             print(f"{Colores.AMARILLO}💡 Por favor configura el sistema y vuelve a intentar{Colores.FIN}")
-            print(f"📋 Usa la opción 10 del menú para más detalles de configuración")
+            print(f"📋 Usa la opción 15 del menú para más detalles de configuración")
