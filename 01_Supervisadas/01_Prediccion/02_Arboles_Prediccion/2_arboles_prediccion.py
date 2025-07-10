@@ -1,9 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-ÁRBOLES DE PREDICCIÓN - Versión Ultra Simple
-Como un árbol de preguntas que predice la población
-"""
+
 
 import pandas as pd
 import numpy as np

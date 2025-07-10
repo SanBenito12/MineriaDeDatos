@@ -1,0 +1,7 @@
+REGLAS DE CLASIFICACIÓN GENERADAS
+========================================
+
+Mejor conjunto: Reglas Simples
+Precisión: 1.000
+Total de reglas: 0
+

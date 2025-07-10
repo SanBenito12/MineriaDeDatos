@@ -1,0 +1,42 @@
+
+REPORTE REDES NEURONALES - CLASIFICACIÓN
+=======================================
+
+MEJOR RED: Red Tanh
+Descripción: Activación tangente hiperbólica
+Precisión: 0.999 (99.9%)
+Arquitectura: (25, 15)
+Activación: tanh
+Solver: lbfgs
+Parámetros totales: 672
+
+CONVERGENCIA:
+
+
+COMPARACIÓN DE ARQUITECTURAS:
+
+Red Tanh:
+  - Precisión: 0.999
+  - Arquitectura: (25, 15)
+  - Activación: tanh
+  - Parámetros: 672
+
+VARIABLES UTILIZADAS:
+POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS, GRAPROES, PEA, POCUPADA
+
+CONFIGURACIÓN:
+- Neuronas de entrada: 9
+- Clases de salida: 2
+- Datos de entrenamiento: 2,100
+- Datos de prueba: 900
+
+DATOS PROCESADOS:
+- Registros originales: 69,084
+- Muestra balanceada: 3,000
+- Muestreo estratificado aplicado
+
+NOTAS:
+- Se aplicó escalado estándar a todas las variables
+- Se utilizó early stopping para evitar overfitting
+- Se reservó 20% de datos de entrenamiento para validación
+- Umbrales ajustados para mejor distribución de clases
