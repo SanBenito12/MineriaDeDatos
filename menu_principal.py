@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-MENÚ PRINCIPAL ACTUALIZADO - SISTEMA COMPLETO DE MINERÍA DE DATOS
-Incluye técnicas supervisadas y no supervisadas
+MENÚ PRINCIPAL OPTIMIZADO - SISTEMA COMPLETO DE MINERÍA DE DATOS
+Sistema integral con todas las técnicas supervisadas y no supervisadas
 """
 
 import os
@@ -10,11 +10,31 @@ import sys
 import time
 import importlib.util
 from datetime import datetime
+from pathlib import Path
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, Callable
 
-sys.path.append('/home/sedc/Proyectos/MineriaDeDatos')
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 CONFIGURACIÓN OPTIMIZADA DEL SISTEMA
+# ═══════════════════════════════════════════════════════════════════
 
-# Colores para la consola
+@dataclass
+class ConfiguracionSistema:
+    """Configuración centralizada del sistema de minería de datos"""
+    
+    # Rutas base del proyecto
+    RUTA_BASE: str = '/home/sedc/Proyectos/MineriaDeDatos'
+    RUTA_DATOS: str = '/home/sedc/Proyectos/MineriaDeDatos/data/ceros_sin_columnasAB_limpio_weka.csv'
+    RUTA_RESULTADOS: str = '/home/sedc/Proyectos/MineriaDeDatos/results/'
+    
+    # Configuración de visualización
+    ANCHO_BANNER: int = 80
+    TIEMPO_PAUSA: float = 2.0
+    MAX_REINTENTOS: int = 3
+
+# Colores optimizados para la consola
 class Colores:
+    """Clase de colores con métodos optimizados"""
     AZUL = '\033[94m'
     VERDE = '\033[92m'
     AMARILLO = '\033[93m'
@@ -24,68 +44,361 @@ class Colores:
     BLANCO = '\033[97m'
     NEGRITA = '\033[1m'
     FIN = '\033[0m'
+    
+    @classmethod
+    def aplicar(cls, texto: str, color: str) -> str:
+        """Aplica color a un texto de manera segura"""
+        return f"{color}{texto}{cls.FIN}"
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 ESTRUCTURA COMPLETA DE TÉCNICAS
+# ═══════════════════════════════════════════════════════════════════
+
+@dataclass
+class TecnicaInfo:
+    """Información detallada de cada técnica"""
+    id: int
+    nombre: str
+    descripcion: str
+    categoria: str
+    subcategoria: str
+    ruta_archivo: str
+    nombre_funcion: str
+    emoji: str
+    dificultad: str
+    tiempo_estimado: str
+
+class RegistroTecnicas:
+    """Registro completo y optimizado de todas las técnicas"""
+    
+    def __init__(self):
+        self.config = ConfiguracionSistema()
+        self.tecnicas = self._cargar_tecnicas_completas()
+    
+    def _cargar_tecnicas_completas(self) -> Dict[int, TecnicaInfo]:
+        """Carga todas las técnicas del sistema de manera optimizada"""
+        
+        base = self.config.RUTA_BASE
+        
+        tecnicas = {
+            # ═══════════════════════════════════════════════════════════════════
+            # 📊 TÉCNICAS SUPERVISADAS - PREDICCIÓN
+            # ═══════════════════════════════════════════════════════════════════
+            1: TecnicaInfo(
+                id=1,
+                nombre="🔵 Regresión Lineal",
+                descripcion="Predicción lineal de población usando relaciones estadísticas",
+                categoria="Supervisada",
+                subcategoria="Predicción",
+                ruta_archivo=f"{base}/01_Supervisadas/01_Prediccion/01_Regresion/1_regresion_lineal.py",
+                nombre_funcion="ejecutar_regresion",
+                emoji="📈",
+                dificultad="Básico",
+                tiempo_estimado="2-3 min"
+            ),
+            
+            2: TecnicaInfo(
+                id=2,
+                nombre="🌳 Árboles de Predicción",
+                descripcion="Predicción usando árboles de decisión interpretables",
+                categoria="Supervisada",
+                subcategoria="Predicción",
+                ruta_archivo=f"{base}/01_Supervisadas/01_Prediccion/02_Arboles_Prediccion/2_arboles_prediccion.py",
+                nombre_funcion="ejecutar_arboles",
+                emoji="🌲",
+                dificultad="Intermedio",
+                tiempo_estimado="3-4 min"
+            ),
+            
+            3: TecnicaInfo(
+                id=3,
+                nombre="🔬 Estimadores de Núcleos",
+                descripcion="Predicción avanzada con SVR y K-NN para patrones complejos",
+                categoria="Supervisada",
+                subcategoria="Predicción",
+                ruta_archivo=f"{base}/01_Supervisadas/01_Prediccion/03_Estimador_Nucleos/3_estimador_nucleos.py",
+                nombre_funcion="ejecutar_nucleos",
+                emoji="⚛️",
+                dificultad="Avanzado",
+                tiempo_estimado="4-6 min"
+            ),
+            
+            # ═══════════════════════════════════════════════════════════════════
+            # 📊 TÉCNICAS SUPERVISADAS - CLASIFICACIÓN
+            # ═══════════════════════════════════════════════════════════════════
+            4: TecnicaInfo(
+                id=4,
+                nombre="🌳 Árboles de Decisión",
+                descripcion="Clasificación interpretable con reglas jerárquicas",
+                categoria="Supervisada",
+                subcategoria="Clasificación",
+                ruta_archivo=f"{base}/01_Supervisadas/02_Clasificacion/01_Arboles_Decision/1_arboles_decision.py",
+                nombre_funcion="ejecutar_arboles_decision",
+                emoji="🎯",
+                dificultad="Básico",
+                tiempo_estimado="3-4 min"
+            ),
+            
+            5: TecnicaInfo(
+                id=5,
+                nombre="📏 Inducción de Reglas",
+                descripcion="Generación automática de reglas IF-THEN explicativas",
+                categoria="Supervisada",
+                subcategoria="Clasificación",
+                ruta_archivo=f"{base}/01_Supervisadas/02_Clasificacion/02_Induccion_Reglas/2_induccion_reglas.py",
+                nombre_funcion="ejecutar_induccion_reglas",
+                emoji="📋",
+                dificultad="Intermedio",
+                tiempo_estimado="4-5 min"
+            ),
+            
+            6: TecnicaInfo(
+                id=6,
+                nombre="🎲 Clasificación Bayesiana",
+                descripcion="Clasificación probabilística usando teorema de Bayes",
+                categoria="Supervisada",
+                subcategoria="Clasificación",
+                ruta_archivo=f"{base}/01_Supervisadas/02_Clasificacion/03_Bayesiana/3_clasificacion_bayesiana.py",
+                nombre_funcion="ejecutar_clasificacion_bayesiana",
+                emoji="🎯",
+                dificultad="Intermedio",
+                tiempo_estimado="3-4 min"
+            ),
+            
+            7: TecnicaInfo(
+                id=7,
+                nombre="👥 Basado en Ejemplares (K-NN)",
+                descripcion="Clasificación por similitud con vecinos cercanos",
+                categoria="Supervisada",
+                subcategoria="Clasificación",
+                ruta_archivo=f"{base}/01_Supervisadas/02_Clasificacion/04_Basado_Ejemplares/4_basado_ejemplares.py",
+                nombre_funcion="ejecutar_clasificacion_ejemplares",
+                emoji="👥",
+                dificultad="Básico",
+                tiempo_estimado="3-4 min"
+            ),
+            
+            8: TecnicaInfo(
+                id=8,
+                nombre="🧠 Redes de Neuronas",
+                descripcion="Aprendizaje profundo con múltiples arquitecturas",
+                categoria="Supervisada",
+                subcategoria="Clasificación",
+                ruta_archivo=f"{base}/01_Supervisadas/02_Clasificacion/05_Redes_Neuronas/5_redes_neuronas.py",
+                nombre_funcion="ejecutar_redes_neuronas",
+                emoji="🧠",
+                dificultad="Avanzado",
+                tiempo_estimado="5-8 min"
+            ),
+            
+            9: TecnicaInfo(
+                id=9,
+                nombre="🌫️ Lógica Borrosa",
+                descripcion="Clasificación con conjuntos difusos y reglas borrosas",
+                categoria="Supervisada",
+                subcategoria="Clasificación",
+                ruta_archivo=f"{base}/01_Supervisadas/02_Clasificacion/06_Logica_Borrosa/6_logica_borrosa.py",
+                nombre_funcion="ejecutar_logica_borrosa",
+                emoji="🌀",
+                dificultad="Avanzado",
+                tiempo_estimado="4-6 min"
+            ),
+            
+            10: TecnicaInfo(
+                id=10,
+                nombre="🧬 Técnicas Genéticas",
+                descripcion="Optimización evolutiva de características e hiperparámetros",
+                categoria="Supervisada",
+                subcategoria="Clasificación",
+                ruta_archivo=f"{base}/01_Supervisadas/02_Clasificacion/07_Tecnicas_Geneticas/7_tecnicas_geneticas.py",
+                nombre_funcion="ejecutar_tecnicas_geneticas",
+                emoji="🧬",
+                dificultad="Avanzado",
+                tiempo_estimado="6-8 min"
+            ),
+            
+            # ═══════════════════════════════════════════════════════════════════
+            # 📊 TÉCNICAS NO SUPERVISADAS - CLUSTERING
+            # ═══════════════════════════════════════════════════════════════════
+            11: TecnicaInfo(
+                id=11,
+                nombre="📊 Clustering Numérico",
+                descripcion="Agrupación K-Means por similitud numérica",
+                categoria="No Supervisada",
+                subcategoria="Clustering",
+                ruta_archivo=f"{base}/02_No_Supervisadas/01_Clustering/01_Numerico/1_clustering_numerico.py",
+                nombre_funcion="ejecutar_clustering_numerico",
+                emoji="📊",
+                dificultad="Básico",
+                tiempo_estimado="3-4 min"
+            ),
+            
+            12: TecnicaInfo(
+                id=12,
+                nombre="🎯 Clustering Conceptual",
+                descripcion="Agrupación basada en conceptos y características",
+                categoria="No Supervisada",
+                subcategoria="Clustering",
+                ruta_archivo=f"{base}/02_No_Supervisadas/01_Clustering/02_Conceptual/2_clustering_conceptual.py",
+                nombre_funcion="ejecutar_clustering_conceptual",
+                emoji="🎯",
+                dificultad="Intermedio",
+                tiempo_estimado="4-5 min"
+            ),
+            
+            13: TecnicaInfo(
+                id=13,
+                nombre="🎲 Clustering Probabilístico",
+                descripcion="Agrupación EM con modelos probabilísticos",
+                categoria="No Supervisada",
+                subcategoria="Clustering",
+                ruta_archivo=f"{base}/02_No_Supervisadas/01_Clustering/03_Probabilistico/3_clustering_probabilistico.py",
+                nombre_funcion="ejecutar_clustering_probabilistico",
+                emoji="🎲",
+                dificultad="Avanzado",
+                tiempo_estimado="4-6 min"
+            ),
+            
+            # ═══════════════════════════════════════════════════════════════════
+            # 📊 TÉCNICAS NO SUPERVISADAS - ASOCIACIÓN
+            # ═══════════════════════════════════════════════════════════════════
+            14: TecnicaInfo(
+                id=14,
+                nombre="🔗 A Priori (Reglas de Asociación)",
+                descripcion="Patrones 'si A entonces B' en datos demográficos",
+                categoria="No Supervisada",
+                subcategoria="Asociación",
+                ruta_archivo=f"{base}/02_No_Supervisadas/02_Asociacion/01_A_Priori/1_apriori_asociacion.py",
+                nombre_funcion="ejecutar_apriori",
+                emoji="🔗",
+                dificultad="Intermedio",
+                tiempo_estimado="5-7 min"
+            )
+        }
+        
+        return tecnicas
+    
+    def obtener_tecnica(self, id_tecnica: int) -> Optional[TecnicaInfo]:
+        """Obtiene información de una técnica específica"""
+        return self.tecnicas.get(id_tecnica)
+    
+    def obtener_por_categoria(self, categoria: str) -> List[TecnicaInfo]:
+        """Obtiene técnicas por categoría"""
+        return [t for t in self.tecnicas.values() if t.categoria == categoria]
+    
+    def obtener_supervisadas(self) -> List[TecnicaInfo]:
+        """Obtiene todas las técnicas supervisadas"""
+        return self.obtener_por_categoria("Supervisada")
+    
+    def obtener_no_supervisadas(self) -> List[TecnicaInfo]:
+        """Obtiene todas las técnicas no supervisadas"""
+        return self.obtener_por_categoria("No Supervisada")
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 UTILIDADES OPTIMIZADAS
+# ═══════════════════════════════════════════════════════════════════
 
 def limpiar_pantalla():
+    """Limpia la pantalla de manera optimizada"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def mostrar_banner():
-    """Mostrar banner principal del sistema"""
-    banner = f"""
-{Colores.CYAN}╔══════════════════════════════════════════════════════════════════════════════╗
-║                                                                              ║
-║  {Colores.NEGRITA}🧠 SISTEMA COMPLETO DE MINERÍA DE DATOS - IA AVANZADA 🧠{Colores.FIN}{Colores.CYAN}            ║
-║                                                                              ║
-║  {Colores.BLANCO}Universidad: [UTP]{Colores.CYAN}                                            ║
-║  {Colores.BLANCO}Proyecto: Análisis Demográfico Integral Michoacan{Colores.CYAN}                          ║
-║  {Colores.BLANCO}Dataset: Censo Poblacional INEGI - 69K+ registros{Colores.CYAN}                      ║
-║  {Colores.BLANCO}Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M')}{Colores.CYAN}                                             ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝{Colores.FIN}
+def pausar_sistema(mensaje: str = "Presiona ENTER para continuar...", tiempo: float = 0):
+    """Pausa optimizada del sistema con timeout opcional"""
+    try:
+        if tiempo > 0:
+            print(f"\n{Colores.AMARILLO}{mensaje} (auto-continúa en {tiempo}s){Colores.FIN}")
+            time.sleep(tiempo)
+        else:
+            input(f"\n{Colores.AMARILLO}{mensaje}{Colores.FIN}")
+    except KeyboardInterrupt:
+        print(f"\n{Colores.AMARILLO}⚠️ Operación interrumpida{Colores.FIN}")
 
-{Colores.AMARILLO}📊 TÉCNICAS IMPLEMENTADAS: Supervisadas (7) + No Supervisadas (4) = 11 TOTAL{Colores.FIN}
-{Colores.VERDE}🎯 OBJETIVO: Sistema integral de minería de datos con todas las técnicas principales{Colores.FIN}
+def mostrar_banner_optimizado():
+    """Banner principal optimizado con información dinámica"""
+    config = ConfiguracionSistema()
+    registro = RegistroTecnicas()
+    
+    total_tecnicas = len(registro.tecnicas)
+    supervisadas = len(registro.obtener_supervisadas())
+    no_supervisadas = len(registro.obtener_no_supervisadas())
+    
+    banner = f"""
+{Colores.CYAN}╔════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                ║
+║  {Colores.NEGRITA}🧠 SISTEMA INTEGRAL DE MINERÍA DE DATOS - IA AVANZADA 🧠{Colores.FIN}{Colores.CYAN}              ║
+║                                                                                ║
+║  {Colores.BLANCO}Universidad: Universidad Tecnológica de Puebla (UTP){Colores.CYAN}                       ║
+║  {Colores.BLANCO}Proyecto: Análisis Demográfico Integral Michoacán{Colores.CYAN}                          ║
+║  {Colores.BLANCO}Dataset: Censo Poblacional INEGI - 69K+ registros{Colores.CYAN}                          ║
+║  {Colores.BLANCO}Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M')}{Colores.CYAN}                                                     ║
+║  {Colores.BLANCO}Técnicas: {total_tecnicas} Total ({supervisadas} Supervisadas + {no_supervisadas} No Supervisadas){Colores.CYAN}                      ║
+║                                                                                ║
+╚════════════════════════════════════════════════════════════════════════════════╝{Colores.FIN}
+
+{Colores.AMARILLO}🎯 SISTEMA COMPLETO: {total_tecnicas} Técnicas de IA y Machine Learning Implementadas{Colores.FIN}
+{Colores.VERDE}📊 OBJETIVO: Análisis integral de datos demográficos con todas las técnicas principales{Colores.FIN}
 """
     print(banner)
 
-def mostrar_menu_principal():
-    """Mostrar el menú principal con todas las opciones"""
+def mostrar_menu_principal_optimizado():
+    """Menú principal optimizado con estructura mejorada"""
+    registro = RegistroTecnicas()
+    
     menu = f"""
 {Colores.NEGRITA}{Colores.AZUL}═══════════════════════════════════════════════════════════════════════════════
-                    🔬 TÉCNICAS SUPERVISADAS (CLASIFICACIÓN)
-═══════════════════════════════════════════════════════════════════════════════{Colores.FIN}
+                    🔬 TÉCNICAS SUPERVISADAS (PREDICCIÓN)
+═══════════════════════════════════════════════════════════════════════════════{Colores.FIN}"""
+    
+    # Técnicas de Predicción (1-3)
+    for i in range(1, 4):
+        tecnica = registro.obtener_tecnica(i)
+        if tecnica:
+            menu += f"\n{Colores.VERDE}{i}.{Colores.FIN} {Colores.NEGRITA}{tecnica.nombre}{Colores.FIN} - {tecnica.descripcion}"
+            menu += f"\n   {Colores.AMARILLO}⏱️ {tecnica.tiempo_estimado} | 📊 {tecnica.dificultad}{Colores.FIN}"
+    
+    menu += f"""
 
-{Colores.VERDE}1.{Colores.FIN} {Colores.NEGRITA}🌳 Árboles de Decisión{Colores.FIN} - Clasificación interpretable con reglas jerárquicas
-{Colores.VERDE}2.{Colores.FIN} {Colores.NEGRITA}📏 Inducción de Reglas{Colores.FIN} - Generación automática de reglas IF-THEN explicativas  
-{Colores.VERDE}3.{Colores.FIN} {Colores.NEGRITA}🎲 Clasificación Bayesiana{Colores.FIN} - Clasificación probabilística (Naive Bayes)
-{Colores.VERDE}4.{Colores.FIN} {Colores.NEGRITA}👥 Basado en Ejemplares (K-NN){Colores.FIN} - Clasificación por similitud con vecinos
-{Colores.VERDE}5.{Colores.FIN} {Colores.NEGRITA}🧠 Redes de Neuronas{Colores.FIN} - Aprendizaje profundo con múltiples arquitecturas
-{Colores.VERDE}6.{Colores.FIN} {Colores.NEGRITA}🌫️  Lógica Borrosa (Fuzzy Logic){Colores.FIN} - Clasificación con conjuntos difusos
-{Colores.VERDE}7.{Colores.FIN} {Colores.NEGRITA}🧬 Técnicas Genéticas{Colores.FIN} - Optimización evolutiva de características
+{Colores.NEGRITA}{Colores.AZUL}═══════════════════════════════════════════════════════════════════════════════
+                    🎯 TÉCNICAS SUPERVISADAS (CLASIFICACIÓN)
+═══════════════════════════════════════════════════════════════════════════════{Colores.FIN}"""
+    
+    # Técnicas de Clasificación (4-10)
+    for i in range(4, 11):
+        tecnica = registro.obtener_tecnica(i)
+        if tecnica:
+            menu += f"\n{Colores.VERDE}{i}.{Colores.FIN} {Colores.NEGRITA}{tecnica.nombre}{Colores.FIN} - {tecnica.descripcion}"
+            menu += f"\n   {Colores.AMARILLO}⏱️ {tecnica.tiempo_estimado} | 📊 {tecnica.dificultad}{Colores.FIN}"
+    
+    menu += f"""
 
 {Colores.NEGRITA}{Colores.MORADO}═══════════════════════════════════════════════════════════════════════════════
                     🔍 TÉCNICAS NO SUPERVISADAS (DESCUBRIMIENTO)
-═══════════════════════════════════════════════════════════════════════════════{Colores.FIN}
-
-{Colores.CYAN}8.{Colores.FIN} {Colores.NEGRITA}🔗 Reglas de Asociación (A Priori){Colores.FIN} - Patrones "si A entonces B"
-{Colores.CYAN}9.{Colores.FIN} {Colores.NEGRITA}📊 Clustering Numérico (K-Means){Colores.FIN} - Agrupación por similitud numérica
-{Colores.CYAN}10.{Colores.FIN} {Colores.NEGRITA}🎯 Clustering Conceptual{Colores.FIN} - Agrupación basada en conceptos
-{Colores.CYAN}11.{Colores.FIN} {Colores.NEGRITA}🎲 Clustering Probabilístico (EM){Colores.FIN} - Agrupación con modelos probabilísticos
+═══════════════════════════════════════════════════════════════════════════════{Colores.FIN}"""
+    
+    # Técnicas No Supervisadas (11-14)
+    for i in range(11, 15):
+        tecnica = registro.obtener_tecnica(i)
+        if tecnica:
+            menu += f"\n{Colores.CYAN}{i}.{Colores.FIN} {Colores.NEGRITA}{tecnica.nombre}{Colores.FIN} - {tecnica.descripcion}"
+            menu += f"\n   {Colores.AMARILLO}⏱️ {tecnica.tiempo_estimado} | 📊 {tecnica.dificultad}{Colores.FIN}"
+    
+    menu += f"""
 
 {Colores.NEGRITA}{Colores.AMARILLO}═══════════════════════════════════════════════════════════════════════════════
                               🚀 OPCIONES DEL SISTEMA
 ═══════════════════════════════════════════════════════════════════════════════{Colores.FIN}
 
-{Colores.ROJO}12.{Colores.FIN} {Colores.NEGRITA}🔥 EJECUTAR TODAS LAS TÉCNICAS{Colores.FIN} - Sistema completo (11 técnicas)
-{Colores.ROJO}13.{Colores.FIN} {Colores.NEGRITA}⚖️  EJECUTAR SOLO SUPERVISADAS{Colores.FIN} - Las 7 técnicas de clasificación
-{Colores.ROJO}14.{Colores.FIN} {Colores.NEGRITA}🔍 EJECUTAR SOLO NO SUPERVISADAS{Colores.FIN} - Las 4 técnicas de descubrimiento
+{Colores.ROJO}15.{Colores.FIN} {Colores.NEGRITA}🔥 EJECUTAR TODAS LAS TÉCNICAS{Colores.FIN} - Sistema completo ({len(registro.tecnicas)} técnicas)
+{Colores.ROJO}16.{Colores.FIN} {Colores.NEGRITA}⚖️ EJECUTAR SOLO SUPERVISADAS{Colores.FIN} - Las {len(registro.obtener_supervisadas())} técnicas de predicción/clasificación
+{Colores.ROJO}17.{Colores.FIN} {Colores.NEGRITA}🔍 EJECUTAR SOLO NO SUPERVISADAS{Colores.FIN} - Las {len(registro.obtener_no_supervisadas())} técnicas de descubrimiento
 
-{Colores.VERDE}15.{Colores.FIN} {Colores.NEGRITA}📊 Ver Resultados y Comparar{Colores.FIN} - Revisar reportes, gráficos y comparaciones
-{Colores.VERDE}16.{Colores.FIN} {Colores.NEGRITA}🏆 Ranking de Técnicas{Colores.FIN} - Comparación de rendimiento por precisión
-{Colores.VERDE}17.{Colores.FIN} {Colores.NEGRITA}📈 Dashboard Ejecutivo{Colores.FIN} - Resumen visual de todos los resultados
+{Colores.VERDE}18.{Colores.FIN} {Colores.NEGRITA}📊 Ver Resultados y Comparar{Colores.FIN} - Revisar reportes, gráficos y comparaciones
+{Colores.VERDE}19.{Colores.FIN} {Colores.NEGRITA}🏆 Ranking de Técnicas{Colores.FIN} - Comparación de rendimiento por precisión
+{Colores.VERDE}20.{Colores.FIN} {Colores.NEGRITA}📈 Dashboard Ejecutivo{Colores.FIN} - Resumen visual de todos los resultados
 
-{Colores.AMARILLO}18.{Colores.FIN} {Colores.NEGRITA}🔧 Configuración y Diagnóstico{Colores.FIN} - Verificar sistema, rutas y dependencias
-{Colores.AMARILLO}19.{Colores.FIN} {Colores.NEGRITA}🧹 Limpiar Resultados{Colores.FIN} - Borrar modelos y reportes anteriores
-{Colores.AMARILLO}20.{Colores.FIN} {Colores.NEGRITA}💾 Exportar Proyecto{Colores.FIN} - Crear backup completo del proyecto
+{Colores.AMARILLO}21.{Colores.FIN} {Colores.NEGRITA}🔧 Configuración y Diagnóstico{Colores.FIN} - Verificar sistema, rutas y dependencias
+{Colores.AMARILLO}22.{Colores.FIN} {Colores.NEGRITA}🧹 Limpiar Resultados{Colores.FIN} - Borrar modelos y reportes anteriores
+{Colores.AMARILLO}23.{Colores.FIN} {Colores.NEGRITA}💾 Exportar Proyecto{Colores.FIN} - Crear backup completo del proyecto
 
 {Colores.ROJO}0.{Colores.FIN} {Colores.NEGRITA}❌ Salir del Sistema{Colores.FIN}
 
@@ -93,160 +406,128 @@ def mostrar_menu_principal():
 """
     print(menu)
 
-def importar_modulo_dinamico(ruta_archivo, nombre_funcion):
-    """Importar dinámicamente un módulo y obtener una función específica"""
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 SISTEMA DE VERIFICACIÓN OPTIMIZADO
+# ═══════════════════════════════════════════════════════════════════
+
+def verificar_sistema_completo() -> Tuple[bool, int, int]:
+    """Verificación completa y optimizada del sistema"""
+    print(f"{Colores.AMARILLO}🔍 Verificando sistema completo...{Colores.FIN}")
+    
+    config = ConfiguracionSistema()
+    registro = RegistroTecnicas()
+    
+    # Verificar archivo de datos
+    datos_ok = Path(config.RUTA_DATOS).exists()
+    print(f"  {'✅' if datos_ok else '❌'} Datos principales: {Colores.VERDE if datos_ok else Colores.ROJO}{'OK' if datos_ok else 'FALTA'}{Colores.FIN}")
+    
+    # Verificar directorios de resultados
+    directorios_resultados = ['graficos', 'modelos', 'reportes']
+    for directorio in directorios_resultados:
+        ruta = Path(config.RUTA_RESULTADOS) / directorio
+        if not ruta.exists():
+            ruta.mkdir(parents=True, exist_ok=True)
+            print(f"  📁 Carpeta creada: {ruta}")
+    
+    # Verificar técnicas
+    supervisadas_disponibles = 0
+    no_supervisadas_disponibles = 0
+    
+    print(f"\n{Colores.AMARILLO}🔍 Verificando técnicas implementadas...{Colores.FIN}")
+    
+    for tecnica in registro.tecnicas.values():
+        if Path(tecnica.ruta_archivo).exists():
+            if tecnica.categoria == "Supervisada":
+                supervisadas_disponibles += 1
+            else:
+                no_supervisadas_disponibles += 1
+            print(f"  ✅ {tecnica.nombre}: {Colores.VERDE}OK{Colores.FIN}")
+        else:
+            print(f"  ❌ {tecnica.nombre}: {Colores.ROJO}NO ENCONTRADO{Colores.FIN}")
+    
+    total_disponibles = supervisadas_disponibles + no_supervisadas_disponibles
+    total_tecnicas = len(registro.tecnicas)
+    
+    print(f"\n{Colores.CYAN}📊 Resumen del sistema:")
+    print(f"  Datos principales: {'✅' if datos_ok else '❌'}")
+    print(f"  Técnicas supervisadas: {supervisadas_disponibles}/{len(registro.obtener_supervisadas())}")
+    print(f"  Técnicas no supervisadas: {no_supervisadas_disponibles}/{len(registro.obtener_no_supervisadas())}")
+    print(f"  TOTAL técnicas disponibles: {total_disponibles}/{total_tecnicas}{Colores.FIN}")
+    
+    return datos_ok, supervisadas_disponibles, no_supervisadas_disponibles
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 SISTEMA DE EJECUCIÓN OPTIMIZADO
+# ═══════════════════════════════════════════════════════════════════
+
+def importar_modulo_dinamico(ruta_archivo: str, nombre_funcion: str) -> Optional[Callable]:
+    """Importación dinámica optimizada con manejo de errores"""
     try:
+        if not Path(ruta_archivo).exists():
+            print(f"  ❌ Archivo no encontrado: {ruta_archivo}")
+            return None
+        
         spec = importlib.util.spec_from_file_location("modulo_temporal", ruta_archivo)
+        if spec is None or spec.loader is None:
+            print(f"  ❌ No se pudo cargar el módulo: {ruta_archivo}")
+            return None
+        
         modulo = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(modulo)
         
         if hasattr(modulo, nombre_funcion):
             return getattr(modulo, nombre_funcion)
         else:
-            print(f"  ⚠️ Función '{nombre_funcion}' no encontrada en {ruta_archivo}")
+            print(f"  ⚠️ Función '{nombre_funcion}' no encontrada en {Path(ruta_archivo).name}")
             return None
+            
     except Exception as e:
-        print(f"  ❌ Error importando {ruta_archivo}: {e}")
+        print(f"  ❌ Error importando {Path(ruta_archivo).name}: {e}")
         return None
 
-def verificar_archivos():
-    """Verificar que existan los archivos necesarios"""
-    rutas_requeridas = {
-        'datos': '/home/sedc/Proyectos/MineriaDeDatos/data/ceros_sin_columnasAB_limpio_weka.csv',
-        'resultados': '/home/sedc/Proyectos/MineriaDeDatos/results/',
-        'graficos': '/home/sedc/Proyectos/MineriaDeDatos/results/graficos/',
-        'modelos': '/home/sedc/Proyectos/MineriaDeDatos/results/modelos/',
-        'reportes': '/home/sedc/Proyectos/MineriaDeDatos/results/reportes/'
-    }
+def ejecutar_tecnica_optimizada(id_tecnica: int) -> bool:
+    """Ejecución optimizada de técnicas individuales"""
+    registro = RegistroTecnicas()
+    tecnica = registro.obtener_tecnica(id_tecnica)
     
-    # Técnicas supervisadas
-    archivos_supervisadas = {
-        'Árboles de Decisión': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/01_Arboles_Decision/1_arboles_decision.py',
-        'Inducción de Reglas': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/02_Induccion_Reglas/2_induccion_reglas.py',
-        'Clasificación Bayesiana': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/03_Bayesiana/3_clasificacion_bayesiana.py',
-        'Basado en Ejemplares': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/04_Basado_Ejemplares/4_basado_ejemplares.py',
-        'Redes de Neuronas': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/05_Redes_Neuronas/5_redes_neuronas.py',
-        'Lógica Borrosa': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/06_Logica_Borrosa/6_logica_borrosa.py',
-        'Técnicas Genéticas': '/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/07_Tecnicas_Geneticas/7_tecnicas_geneticas.py'
-    }
+    if not tecnica:
+        print(f"{Colores.ROJO}❌ Técnica no encontrada: ID {id_tecnica}{Colores.FIN}")
+        return False
     
-    # Técnicas no supervisadas
-    archivos_no_supervisadas = {
-        'A Priori': '/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/02_Asociacion/01_A_Priori/1_apriori_asociacion.py',
-        'Clustering Numérico': '/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/01_Numerico/1_clustering_numerico.py',
-        'Clustering Conceptual': '/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/02_Conceptual/2_clustering_conceptual.py',
-        'Clustering Probabilístico': '/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/03_Probabilistico/3_clustering_probabilistico.py'
-    }
-    
-    print(f"{Colores.AMARILLO}🔍 Verificando sistema completo...{Colores.FIN}")
-    
-    # Verificar directorios
-    for nombre, ruta in rutas_requeridas.items():
-        if os.path.exists(ruta):
-            print(f"  ✅ {nombre.capitalize()}: {Colores.VERDE}OK{Colores.FIN}")
-        else:
-            print(f"  ❌ {nombre.capitalize()}: {Colores.ROJO}NO ENCONTRADO{Colores.FIN}")
-            if nombre != 'datos':
-                try:
-                    os.makedirs(ruta, exist_ok=True)
-                    print(f"     {Colores.AMARILLO}📁 Carpeta creada: {ruta}{Colores.FIN}")
-                except Exception as e:
-                    print(f"     {Colores.ROJO}❌ Error creando carpeta: {e}{Colores.FIN}")
-    
-    # Verificar técnicas supervisadas
-    print(f"\n{Colores.AMARILLO}🔍 Verificando técnicas supervisadas...{Colores.FIN}")
-    supervisadas_disponibles = 0
-    for nombre, ruta in archivos_supervisadas.items():
-        if os.path.exists(ruta):
-            print(f"  ✅ {nombre}: {Colores.VERDE}OK{Colores.FIN}")
-            supervisadas_disponibles += 1
-        else:
-            print(f"  ❌ {nombre}: {Colores.ROJO}NO ENCONTRADO{Colores.FIN}")
-    
-    # Verificar técnicas no supervisadas
-    print(f"\n{Colores.AMARILLO}🔍 Verificando técnicas no supervisadas...{Colores.FIN}")
-    no_supervisadas_disponibles = 0
-    for nombre, ruta in archivos_no_supervisadas.items():
-        if os.path.exists(ruta):
-            print(f"  ✅ {nombre}: {Colores.VERDE}OK{Colores.FIN}")
-            no_supervisadas_disponibles += 1
-        else:
-            print(f"  ❌ {nombre}: {Colores.ROJO}NO ENCONTRADO{Colores.FIN}")
-            print(f"     {Colores.AMARILLO}Esperado en: {ruta}{Colores.FIN}")
-    
-    datos_ok = os.path.exists(rutas_requeridas['datos'])
-    total_tecnicas = supervisadas_disponibles + no_supervisadas_disponibles
-    
-    print(f"\n{Colores.CYAN}📊 Resumen del sistema:")
-    print(f"  Datos principales: {'✅' if datos_ok else '❌'}")
-    print(f"  Técnicas supervisadas: {supervisadas_disponibles}/7")
-    print(f"  Técnicas no supervisadas: {no_supervisadas_disponibles}/4")
-    print(f"  TOTAL técnicas disponibles: {total_tecnicas}/11{Colores.FIN}")
-    
-    return datos_ok, supervisadas_disponibles, no_supervisadas_disponibles
-
-def ejecutar_tecnica(numero, nombre_tecnica, descripcion):
-    """Ejecutar una técnica específica"""
     print(f"\n{Colores.CYAN}{'='*80}")
-    print(f"🚀 EJECUTANDO: {nombre_tecnica}")
-    print(f"📝 {descripcion}")
+    print(f"🚀 EJECUTANDO: {tecnica.nombre}")
+    print(f"📝 {tecnica.descripcion}")
+    print(f"⏱️ Tiempo estimado: {tecnica.tiempo_estimado} | 📊 Dificultad: {tecnica.dificultad}")
+    print(f"📂 Categoría: {tecnica.categoria} → {tecnica.subcategoria}")
     print(f"{'='*80}{Colores.FIN}\n")
-    
-    # Mapeo completo de técnicas del powerpoint
-    archivos_tecnicas = {
-        # Supervisadas
-        1: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/01_Arboles_Decision/1_arboles_decision.py', 'ejecutar_arboles_decision'),
-        2: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/02_Induccion_Reglas/2_induccion_reglas.py', 'ejecutar_induccion_reglas'),
-        3: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/03_Bayesiana/3_clasificacion_bayesiana.py', 'ejecutar_clasificacion_bayesiana'),
-        4: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/04_Basado_Ejemplares/4_basado_ejemplares.py', 'ejecutar_clasificacion_ejemplares'),
-        5: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/05_Redes_Neuronas/5_redes_neuronas.py', 'ejecutar_redes_neuronas'),
-        6: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/06_Logica_Borrosa/6_logica_borrosa.py', 'ejecutar_logica_borrosa'),
-        7: ('/home/sedc/Proyectos/MineriaDeDatos/01_Supervisadas/02_Clasificacion/07_Tecnicas_Geneticas/7_tecnicas_geneticas.py', 'ejecutar_tecnicas_geneticas'),
-        # No supervisadas
-        8: ('/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/02_Asociacion/01_A_Priori/1_apriori_asociacion.py', 'ejecutar_apriori'),
-        9: ('/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/01_Numerico/1_clustering_numerico.py', 'ejecutar_clustering_numerico'),
-        10: ('/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/02_Conceptual/2_clustering_conceptual.py', 'ejecutar_clustering_conceptual'),
-        11: ('/home/sedc/Proyectos/MineriaDeDatos/02_No_Supervisadas/01_Clustering/03_Probabilistico/3_clustering_probabilistico.py', 'ejecutar_clustering_probabilistico')
-    }
     
     inicio = time.time()
     
     try:
-        if numero in archivos_tecnicas:
-            archivo_path, nombre_funcion = archivos_tecnicas[numero]
-            
-            # Verificar que el archivo existe
-            if not os.path.exists(archivo_path):
-                print(f"{Colores.ROJO}❌ Archivo no encontrado: {archivo_path}{Colores.FIN}")
-                return False
-            
-            # Importar dinámicamente la función
-            funcion = importar_modulo_dinamico(archivo_path, nombre_funcion)
-            
-            if funcion is None:
-                print(f"{Colores.ROJO}❌ No se pudo importar la función {nombre_funcion}{Colores.FIN}")
-                return False
-            
-            # Ejecutar la técnica
-            print(f"{Colores.VERDE}✅ Función importada correctamente. Iniciando ejecución...{Colores.FIN}\n")
-            resultado = funcion()
-            
-            fin = time.time()
-            duracion = fin - inicio
-            
-            print(f"\n{Colores.VERDE}{'='*60}")
-            print(f"✅ TÉCNICA COMPLETADA EXITOSAMENTE")
-            print(f"⏱️  Tiempo de ejecución: {duracion:.1f} segundos ({duracion/60:.1f} minutos)")
-            print(f"📊 Resultados guardados en /results/")
-            print(f"{'='*60}{Colores.FIN}")
-            
-            return True
-        else:
-            print(f"{Colores.ROJO}❌ Número de técnica inválido: {numero}{Colores.FIN}")
+        # Importar función dinámicamente
+        funcion = importar_modulo_dinamico(tecnica.ruta_archivo, tecnica.nombre_funcion)
+        
+        if funcion is None:
+            print(f"{Colores.ROJO}❌ No se pudo importar la función {tecnica.nombre_funcion}{Colores.FIN}")
             return False
-            
+        
+        # Ejecutar la técnica
+        print(f"{Colores.VERDE}✅ Función importada correctamente. Iniciando ejecución...{Colores.FIN}\n")
+        resultado = funcion()
+        
+        fin = time.time()
+        duracion = fin - inicio
+        
+        print(f"\n{Colores.VERDE}{'='*60}")
+        print(f"✅ TÉCNICA COMPLETADA EXITOSAMENTE")
+        print(f"⏱️ Tiempo de ejecución: {duracion:.1f}s ({duracion/60:.1f} min)")
+        print(f"📊 Resultados guardados en: /results/")
+        print(f"{'='*60}{Colores.FIN}")
+        
+        return True
+        
     except KeyboardInterrupt:
-        print(f"\n{Colores.AMARILLO}⚠️  Ejecución interrumpida por el usuario{Colores.FIN}")
+        print(f"\n{Colores.AMARILLO}⚠️ Ejecución interrumpida por el usuario{Colores.FIN}")
         return False
     except Exception as e:
         fin = time.time()
@@ -255,225 +536,122 @@ def ejecutar_tecnica(numero, nombre_tecnica, descripcion):
         print(f"\n{Colores.ROJO}{'='*60}")
         print(f"❌ ERROR EN LA EJECUCIÓN:")
         print(f"   {str(e)}")
-        print(f"⏱️  Tiempo transcurrido: {duracion:.1f} segundos")
+        print(f"⏱️ Tiempo transcurrido: {duracion:.1f}s")
         print(f"{'='*60}{Colores.FIN}")
         return False
 
-def ejecutar_todas_las_tecnicas():
-    """Ejecutar las 11 técnicas completas"""
-    tecnicas_info = [
-        # Supervisadas
-        (1, "🌳 Árboles de Decisión", "Clasificación con reglas interpretables"),
-        (2, "📏 Inducción de Reglas", "Generación de reglas IF-THEN"),
-        (3, "🎲 Clasificación Bayesiana", "Clasificación probabilística"),
-        (4, "👥 Basado en Ejemplares", "Clasificación por similitud (K-NN)"),
-        (5, "🧠 Redes de Neuronas", "Aprendizaje con redes neuronales"),
-        (6, "🌫️ Lógica Borrosa", "Clasificación con conjuntos difusos"),
-        (7, "🧬 Técnicas Genéticas", "Optimización evolutiva"),
-        # No supervisadas
-        (8, "🔗 A Priori", "Reglas de asociación"),
-        (9, "📊 Clustering Numérico", "Agrupación K-Means"),
-        (10, "🎯 Clustering Conceptual", "Agrupación por conceptos"),
-        (11, "🎲 Clustering Probabilístico", "Agrupación EM")
-    ]
+def ejecutar_conjunto_tecnicas(tecnicas: List[TecnicaInfo], nombre_conjunto: str) -> Dict[str, bool]:
+    """Ejecuta un conjunto de técnicas de manera optimizada"""
+    print(f"\n{Colores.MORADO}{Colores.NEGRITA}🚀 EJECUTANDO {nombre_conjunto.upper()}{Colores.FIN}")
+    print(f"{Colores.AMARILLO}📊 Total técnicas: {len(tecnicas)}")
     
-    print(f"\n{Colores.MORADO}{Colores.NEGRITA}🚀 EJECUTANDO SISTEMA COMPLETO DE MINERÍA DE DATOS{Colores.FIN}")
-    print(f"{Colores.AMARILLO}⏱️  Sistema integral: 11 técnicas (7 supervisadas + 4 no supervisadas)")
-    print(f"   Tiempo estimado: 30-60 minutos dependiendo de tu hardware...{Colores.FIN}")
+    # Calcular tiempo estimado total
+    tiempo_total_estimado = sum([
+        int(t.tiempo_estimado.split('-')[1].split()[0]) 
+        for t in tecnicas 
+        if '-' in t.tiempo_estimado and t.tiempo_estimado.split('-')[1].split()[0].isdigit()
+    ])
+    
+    print(f"⏱️ Tiempo estimado total: {tiempo_total_estimado}-{tiempo_total_estimado + 10} minutos{Colores.FIN}")
     
     # Confirmar ejecución
-    confirmacion = input(f"\n{Colores.AMARILLO}¿Ejecutar el sistema completo? (s/N): {Colores.FIN}").strip().lower()
+    confirmacion = input(f"\n{Colores.AMARILLO}¿Ejecutar {nombre_conjunto}? (s/N): {Colores.FIN}").strip().lower()
     if confirmacion not in ['s', 'si', 'sí', 'y', 'yes']:
-        print(f"{Colores.AMARILLO}❌ Ejecución cancelada por el usuario{Colores.FIN}")
-        return
+        print(f"{Colores.AMARILLO}❌ Ejecución cancelada{Colores.FIN}")
+        return {}
     
-    print(f"\n{Colores.VERDE}✅ Iniciando sistema integral de minería de datos...{Colores.FIN}\n")
-    
-    resultados = {}
-    tiempo_total_inicio = time.time()
-    supervisadas_exitosas = 0
-    no_supervisadas_exitosas = 0
-    
-    for i, (num, nombre, desc) in enumerate(tecnicas_info, 1):
-        print(f"{Colores.CYAN}{'─'*80}")
-        print(f"[{i}/11] Ejecutando: {nombre}")
-        if i <= 7:
-            print(f"        Categoría: SUPERVISADA (Clasificación)")
-        else:
-            print(f"        Categoría: NO SUPERVISADA (Descubrimiento)")
-        print(f"{'─'*80}{Colores.FIN}")
-        
-        exito = ejecutar_tecnica(num, nombre, desc)
-        resultados[nombre] = exito
-        
-        if exito:
-            print(f"{Colores.VERDE}✅ {nombre} completado exitosamente{Colores.FIN}")
-            if i <= 7:
-                supervisadas_exitosas += 1
-            else:
-                no_supervisadas_exitosas += 1
-        else:
-            print(f"{Colores.ROJO}❌ {nombre} falló durante la ejecución{Colores.FIN}")
-        
-        # Pausa entre técnicas
-        if i < len(tecnicas_info):
-            print(f"\n{Colores.AMARILLO}⏳ Preparando siguiente técnica en 3 segundos...{Colores.FIN}")
-            time.sleep(3)
-    
-    tiempo_total_fin = time.time()
-    duracion_total = tiempo_total_fin - tiempo_total_inicio
-    
-    # Resumen final
-    print(f"\n{Colores.MORADO}{Colores.NEGRITA}{'='*80}")
-    print("📊 RESUMEN DEL SISTEMA INTEGRAL DE MINERÍA DE DATOS")
-    print(f"{'='*80}{Colores.FIN}")
-    
-    total_exitosas = supervisadas_exitosas + no_supervisadas_exitosas
-    total_fallidas = 11 - total_exitosas
-    
-    print(f"✅ Técnicas exitosas: {Colores.VERDE}{total_exitosas}/11{Colores.FIN}")
-    print(f"   └─ Supervisadas: {Colores.VERDE}{supervisadas_exitosas}/7{Colores.FIN}")
-    print(f"   └─ No supervisadas: {Colores.VERDE}{no_supervisadas_exitosas}/4{Colores.FIN}")
-    print(f"❌ Técnicas fallidas: {Colores.ROJO}{total_fallidas}/11{Colores.FIN}")
-    print(f"⏱️  Tiempo total: {Colores.AMARILLO}{duracion_total/60:.1f} minutos{Colores.FIN}")
-    
-    print(f"\n{Colores.CYAN}📁 ARCHIVOS GENERADOS:{Colores.FIN}")
-    print("   📊 Gráficos: /results/graficos/")
-    print("   🤖 Modelos: /results/modelos/")
-    print("   📄 Reportes: /results/reportes/")
-    
-    if total_exitosas == 11:
-        print(f"\n{Colores.VERDE}🎉 ¡SISTEMA COMPLETO EJECUTADO EXITOSAMENTE!")
-        print(f"🏆 Tu proyecto integral de minería de datos está completo")
-        print(f"📈 Tienes implementadas TODAS las técnicas principales de IA{Colores.FIN}")
-    elif total_exitosas >= 8:
-        print(f"\n{Colores.AMARILLO}⚠️  Sistema mayormente completado ({total_exitosas}/11)")
-        print(f"💡 Excelente progreso, revisa las técnicas fallidas{Colores.FIN}")
-    elif total_exitosas >= 5:
-        print(f"\n{Colores.AMARILLO}⚠️  Sistema parcialmente completado ({total_exitosas}/11)")
-        print(f"💡 Buen progreso, pero revisa configuración del sistema{Colores.FIN}")
-    else:
-        print(f"\n{Colores.ROJO}❌ Sistema no completado exitosamente")
-        print(f"🔧 Revisa la configuración del sistema y dependencias{Colores.FIN}")
-
-def ejecutar_solo_supervisadas():
-    """Ejecutar solo las 7 técnicas supervisadas"""
-    tecnicas_supervisadas = [
-        (1, "🌳 Árboles de Decisión", "Clasificación interpretable"),
-        (2, "📏 Inducción de Reglas", "Reglas IF-THEN"),
-        (3, "🎲 Clasificación Bayesiana", "Naive Bayes"),
-        (4, "👥 Basado en Ejemplares", "K-NN"),
-        (5, "🧠 Redes de Neuronas", "Deep Learning"),
-        (6, "🌫️ Lógica Borrosa", "Fuzzy Logic"),
-        (7, "🧬 Técnicas Genéticas", "Algoritmos Evolutivos")
-    ]
-    
-    print(f"\n{Colores.VERDE}{Colores.NEGRITA}⚖️  EJECUTANDO TÉCNICAS SUPERVISADAS{Colores.FIN}")
-    print(f"{Colores.AMARILLO}🎯 Enfoque: Clasificación de poblaciones por tamaño")
-    print(f"⏱️  Tiempo estimado: 20-35 minutos{Colores.FIN}")
-    
-    confirmacion = input(f"\n{Colores.AMARILLO}¿Ejecutar las 7 técnicas supervisadas? (s/N): {Colores.FIN}").strip().lower()
-    if confirmacion not in ['s', 'si', 'sí', 'y', 'yes']:
-        return
-    
-    _ejecutar_conjunto_tecnicas(tecnicas_supervisadas, "SUPERVISADAS")
-
-def ejecutar_solo_no_supervisadas():
-    """Ejecutar solo las 4 técnicas no supervisadas"""
-    tecnicas_no_supervisadas = [
-        (8, "🔗 A Priori", "Reglas de asociación"),
-        (9, "📊 Clustering Numérico", "K-Means"),
-        (10, "🎯 Clustering Conceptual", "Agrupación conceptual"),
-        (11, "🎲 Clustering Probabilístico", "EM Algorithm")
-    ]
-    
-    print(f"\n{Colores.CYAN}{Colores.NEGRITA}🔍 EJECUTANDO TÉCNICAS NO SUPERVISADAS{Colores.FIN}")
-    print(f"{Colores.AMARILLO}🎯 Enfoque: Descubrimiento de patrones ocultos")
-    print(f"⏱️  Tiempo estimado: 15-25 minutos{Colores.FIN}")
-    
-    confirmacion = input(f"\n{Colores.AMARILLO}¿Ejecutar las 4 técnicas no supervisadas? (s/N): {Colores.FIN}").strip().lower()
-    if confirmacion not in ['s', 'si', 'sí', 'y', 'yes']:
-        return
-    
-    _ejecutar_conjunto_tecnicas(tecnicas_no_supervisadas, "NO SUPERVISADAS")
-
-def _ejecutar_conjunto_tecnicas(tecnicas, tipo):
-    """Función auxiliar para ejecutar un conjunto de técnicas"""
     resultados = {}
     tiempo_inicio = time.time()
     exitosas = 0
     
-    for i, (num, nombre, desc) in enumerate(tecnicas, 1):
-        print(f"{Colores.CYAN}{'─'*60}")
-        print(f"[{i}/{len(tecnicas)}] {nombre}")
-        print(f"{'─'*60}{Colores.FIN}")
+    for i, tecnica in enumerate(tecnicas, 1):
+        print(f"\n{Colores.CYAN}{'─'*80}")
+        print(f"[{i}/{len(tecnicas)}] {tecnica.nombre}")
+        print(f"📝 {tecnica.descripcion}")
+        print(f"⏱️ {tecnica.tiempo_estimado} | 📊 {tecnica.dificultad}")
+        print(f"{'─'*80}{Colores.FIN}")
         
-        exito = ejecutar_tecnica(num, nombre, desc)
-        resultados[nombre] = exito
+        exito = ejecutar_tecnica_optimizada(tecnica.id)
+        resultados[tecnica.nombre] = exito
         
         if exito:
             exitosas += 1
-            print(f"{Colores.VERDE}✅ Completado{Colores.FIN}")
+            print(f"{Colores.VERDE}✅ {tecnica.nombre} completada{Colores.FIN}")
         else:
-            print(f"{Colores.ROJO}❌ Falló{Colores.FIN}")
+            print(f"{Colores.ROJO}❌ {tecnica.nombre} falló{Colores.FIN}")
         
+        # Pausa entre técnicas (excepto la última)
         if i < len(tecnicas):
+            print(f"\n{Colores.AMARILLO}⏳ Preparando siguiente técnica...{Colores.FIN}")
             time.sleep(2)
     
     duracion = (time.time() - tiempo_inicio) / 60
     
-    print(f"\n{Colores.MORADO}📊 RESUMEN {tipo}:")
-    print(f"✅ Exitosas: {exitosas}/{len(tecnicas)}")
-    print(f"⏱️  Tiempo: {duracion:.1f} minutos{Colores.FIN}")
+    print(f"\n{Colores.MORADO}{'='*60}")
+    print(f"📊 RESUMEN {nombre_conjunto.upper()}:")
+    print(f"✅ Exitosas: {exitosas}/{len(tecnicas)} ({exitosas/len(tecnicas)*100:.1f}%)")
+    print(f"⏱️ Tiempo total: {duracion:.1f} minutos")
+    print(f"{'='*60}{Colores.FIN}")
+    
+    return resultados
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 FUNCIONES DE ANÁLISIS Y GESTIÓN
+# ═══════════════════════════════════════════════════════════════════
 
 def ver_resultados_guardados():
-    """Mostrar información detallada sobre resultados guardados"""
+    """Análisis optimizado de resultados guardados"""
     print(f"\n{Colores.CYAN}📊 ANÁLISIS DE RESULTADOS GUARDADOS...{Colores.FIN}\n")
     
+    config = ConfiguracionSistema()
     rutas = {
-        'Gráficos': '/home/sedc/Proyectos/MineriaDeDatos/results/graficos/',
-        'Modelos': '/home/sedc/Proyectos/MineriaDeDatos/results/modelos/',
-        'Reportes': '/home/sedc/Proyectos/MineriaDeDatos/results/reportes/'
+        'Gráficos': Path(config.RUTA_RESULTADOS) / 'graficos',
+        'Modelos': Path(config.RUTA_RESULTADOS) / 'modelos',
+        'Reportes': Path(config.RUTA_RESULTADOS) / 'reportes'
     }
     
     total_archivos = 0
     total_tamaño = 0
-    tecnicas_completadas = []
+    tecnicas_completadas = set()
     
     for categoria, ruta in rutas.items():
         print(f"{Colores.NEGRITA}{categoria}:{Colores.FIN}")
         
-        if os.path.exists(ruta):
-            archivos = os.listdir(ruta)
+        if ruta.exists():
+            archivos = list(ruta.glob('*'))
             if archivos:
-                archivos_ordenados = sorted(archivos, key=lambda x: os.path.getmtime(os.path.join(ruta, x)), reverse=True)
+                # Ordenar por fecha de modificación
+                archivos.sort(key=lambda x: x.stat().st_mtime, reverse=True)
                 
-                for archivo in archivos_ordenados:
-                    ruta_completa = os.path.join(ruta, archivo)
-                    tamaño = os.path.getsize(ruta_completa)
-                    fecha = datetime.fromtimestamp(os.path.getmtime(ruta_completa))
-                    
-                    # Iconos según el tipo de archivo
-                    if archivo.endswith('.png'):
-                        icono = "🖼️"
-                    elif archivo.endswith('.pkl'):
-                        icono = "🤖"
-                    elif archivo.endswith('.txt'):
-                        icono = "📄"
-                    else:
-                        icono = "📁"
-                    
-                    print(f"  {icono} {archivo}")
-                    print(f"      📏 {tamaño/1024:.1f} KB | 📅 {fecha.strftime('%Y-%m-%d %H:%M')}")
-                    
-                    total_archivos += 1
-                    total_tamaño += tamaño
-                    
-                    # Detectar técnicas completadas
-                    if '_clasificacion.png' in archivo or '_asociacion.png' in archivo or '_clustering.png' in archivo:
-                        tecnica = archivo.replace('_clasificacion.png', '').replace('_asociacion.png', '').replace('_clustering.png', '').replace('_', ' ').title()
-                        if tecnica not in tecnicas_completadas:
-                            tecnicas_completadas.append(tecnica)
+                for archivo in archivos[:10]:  # Mostrar solo los 10 más recientes
+                    if archivo.is_file():
+                        tamaño = archivo.stat().st_size
+                        fecha = datetime.fromtimestamp(archivo.stat().st_mtime)
+                        
+                        # Iconos según el tipo de archivo
+                        iconos = {
+                            '.png': "🖼️", '.jpg': "🖼️", '.jpeg': "🖼️",
+                            '.pkl': "🤖", '.joblib': "🤖",
+                            '.txt': "📄", '.md': "📄",
+                            '.csv': "📊", '.json': "📋"
+                        }
+                        icono = iconos.get(archivo.suffix.lower(), "📁")
+                        
+                        print(f"  {icono} {archivo.name}")
+                        print(f"      📏 {tamaño/1024:.1f} KB | 📅 {fecha.strftime('%Y-%m-%d %H:%M')}")
+                        
+                        total_archivos += 1
+                        total_tamaño += tamaño
+                        
+                        # Detectar técnicas completadas
+                        nombre_sin_ext = archivo.stem.lower()
+                        if any(keyword in nombre_sin_ext for keyword in 
+                              ['regresion', 'arboles', 'nucleos', 'clasificacion', 'bayesian', 
+                               'knn', 'redes', 'borrosa', 'genetica', 'clustering', 'apriori']):
+                            tecnicas_completadas.add(nombre_sin_ext.replace('_', ' ').title())
+                
+                if len(archivos) > 10:
+                    print(f"  {Colores.AMARILLO}... y {len(archivos) - 10} archivos más{Colores.FIN}")
             else:
                 print(f"  {Colores.AMARILLO}📭 Carpeta vacía{Colores.FIN}")
         else:
@@ -485,58 +663,55 @@ def ver_resultados_guardados():
         print(f"{Colores.CYAN}📊 RESUMEN TOTAL:")
         print(f"  📁 Total archivos: {total_archivos}")
         print(f"  💾 Espacio utilizado: {total_tamaño/1024/1024:.1f} MB")
-        print(f"  🔬 Técnicas detectadas: {len(tecnicas_completadas)}/11{Colores.FIN}")
+        print(f"  🔬 Técnicas detectadas: {len(tecnicas_completadas)}/14{Colores.FIN}")
         
         if tecnicas_completadas:
             print(f"\n{Colores.VERDE}✅ Técnicas completadas:")
-            for tecnica in sorted(tecnicas_completadas):
+            for tecnica in sorted(tecnicas_completadas)[:10]:
                 print(f"  🎯 {tecnica}{Colores.FIN}")
 
 def crear_ranking_tecnicas():
-    """Crear ranking de técnicas por rendimiento"""
+    """Crear ranking optimizado de técnicas por rendimiento"""
     print(f"\n{Colores.CYAN}🏆 GENERANDO RANKING DE TÉCNICAS...{Colores.FIN}\n")
     
-    # Buscar reportes de técnicas
-    reportes_path = '/home/sedc/Proyectos/MineriaDeDatos/results/reportes/'
+    config = ConfiguracionSistema()
+    reportes_path = Path(config.RUTA_RESULTADOS) / 'reportes'
     
-    if not os.path.exists(reportes_path):
+    if not reportes_path.exists():
         print(f"{Colores.ROJO}❌ No se encontraron reportes{Colores.FIN}")
         return
     
     tecnicas_rendimiento = []
     
     # Buscar archivos de reporte
-    archivos_reporte = [f for f in os.listdir(reportes_path) if f.endswith('_reporte.txt')]
+    archivos_reporte = list(reportes_path.glob('*_reporte.txt'))
     
     for archivo in archivos_reporte:
         try:
-            with open(os.path.join(reportes_path, archivo), 'r', encoding='utf-8') as f:
-                contenido = f.read()
+            contenido = archivo.read_text(encoding='utf-8')
+            
+            # Extraer precisión del contenido usando regex
+            import re
+            matches = re.findall(r'[Pp]recisión:?\s*(\d+\.\d+)', contenido)
+            
+            if matches:
+                precision = float(matches[0])
+                tecnica_nombre = archivo.stem.replace('_reporte', '').replace('_', ' ').title()
                 
-                # Extraer precisión del contenido
-                if 'Precisión:' in contenido:
-                    lineas = contenido.split('\n')
-                    for linea in lineas:
-                        if 'Precisión:' in linea or 'precisión:' in linea:
-                            # Buscar valor numérico
-                            import re
-                            match = re.search(r'(\d+\.\d+)', linea)
-                            if match:
-                                precision = float(match.group(1))
-                                tecnica_nombre = archivo.replace('_reporte.txt', '').replace('_', ' ').title()
-                                
-                                # Determinar categoría
-                                categoria = "Supervisada" if any(x in archivo for x in ['clasificacion', 'arboles', 'bayesian', 'knn', 'redes', 'borrosa', 'genetica']) else "No Supervisada"
-                                
-                                tecnicas_rendimiento.append({
-                                    'nombre': tecnica_nombre,
-                                    'precision': precision,
-                                    'categoria': categoria,
-                                    'archivo': archivo
-                                })
-                                break
+                # Determinar categoría
+                categoria = "Supervisada" if any(x in archivo.name.lower() for x in 
+                          ['clasificacion', 'arboles', 'bayesian', 'knn', 'redes', 'borrosa', 
+                           'genetica', 'regresion', 'nucleos']) else "No Supervisada"
+                
+                tecnicas_rendimiento.append({
+                    'nombre': tecnica_nombre,
+                    'precision': precision,
+                    'categoria': categoria,
+                    'archivo': archivo.name
+                })
+                
         except Exception as e:
-            print(f"  ⚠️ Error leyendo {archivo}: {e}")
+            print(f"  ⚠️ Error leyendo {archivo.name}: {e}")
     
     if not tecnicas_rendimiento:
         print(f"{Colores.AMARILLO}⚠️ No se encontraron métricas de rendimiento{Colores.FIN}")
@@ -546,7 +721,7 @@ def crear_ranking_tecnicas():
     tecnicas_rendimiento.sort(key=lambda x: x['precision'], reverse=True)
     
     print(f"{Colores.NEGRITA}🏆 RANKING DE TÉCNICAS POR PRECISIÓN:{Colores.FIN}")
-    print("=" * 60)
+    print("=" * 70)
     
     for i, tecnica in enumerate(tecnicas_rendimiento, 1):
         if i == 1:
@@ -564,7 +739,7 @@ def crear_ranking_tecnicas():
         
         categoria_emoji = "⚖️" if tecnica['categoria'] == "Supervisada" else "🔍"
         
-        print(f"{color}{emoji} {tecnica['nombre']:25} | {categoria_emoji} {tecnica['categoria']:13} | 🎯 {tecnica['precision']:.3f}{Colores.FIN}")
+        print(f"{color}{emoji} {tecnica['nombre']:30} | {categoria_emoji} {tecnica['categoria']:13} | 🎯 {tecnica['precision']:.3f}{Colores.FIN}")
     
     # Estadísticas
     supervisadas = [t for t in tecnicas_rendimiento if t['categoria'] == "Supervisada"]
@@ -572,341 +747,169 @@ def crear_ranking_tecnicas():
     
     print(f"\n{Colores.CYAN}📊 ESTADÍSTICAS:")
     if supervisadas:
-        precision_sup = np.mean([t['precision'] for t in supervisadas])
-        print(f"  ⚖️  Precisión promedio supervisadas: {precision_sup:.3f}")
+        precision_sup = sum(t['precision'] for t in supervisadas) / len(supervisadas)
+        print(f"  ⚖️ Precisión promedio supervisadas: {precision_sup:.3f}")
     if no_supervisadas:
-        precision_no_sup = np.mean([t['precision'] for t in no_supervisadas])
+        precision_no_sup = sum(t['precision'] for t in no_supervisadas) / len(no_supervisadas)
         print(f"  🔍 Precisión promedio no supervisadas: {precision_no_sup:.3f}")
     
-    precision_total = np.mean([t['precision'] for t in tecnicas_rendimiento])
+    precision_total = sum(t['precision'] for t in tecnicas_rendimiento) / len(tecnicas_rendimiento)
     print(f"  🎯 Precisión promedio total: {precision_total:.3f}{Colores.FIN}")
 
-def crear_dashboard_ejecutivo():
-    """Crear dashboard ejecutivo con resumen visual"""
-    print(f"\n{Colores.CYAN}📈 GENERANDO DASHBOARD EJECUTIVO...{Colores.FIN}\n")
-    
-    try:
-        import matplotlib.pyplot as plt
-        import numpy as np
-        
-        # Datos del sistema
-        datos_ok, supervisadas_disponibles, no_supervisadas_disponibles = verificar_archivos()
-        
-        # Crear figura del dashboard
-        fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-        fig.suptitle('📈 DASHBOARD EJECUTIVO - SISTEMA DE MINERÍA DE DATOS', fontsize=16, fontweight='bold')
-        
-        # Gráfico 1: Estado del sistema
-        categorias = ['Supervisadas', 'No Supervisadas']
-        disponibles = [supervisadas_disponibles, no_supervisadas_disponibles]
-        totales = [7, 4]
-        
-        x = np.arange(len(categorias))
-        width = 0.35
-        
-        axes[0,0].bar(x - width/2, disponibles, width, label='Disponibles', color='lightgreen')
-        axes[0,0].bar(x + width/2, totales, width, label='Total', color='lightblue', alpha=0.7)
-        axes[0,0].set_xlabel('Categoría de Técnicas')
-        axes[0,0].set_ylabel('Cantidad')
-        axes[0,0].set_title('🔬 Estado de Implementación')
-        axes[0,0].set_xticks(x)
-        axes[0,0].set_xticklabels(categorias)
-        axes[0,0].legend()
-        
-        # Añadir etiquetas
-        for i, (disp, total) in enumerate(zip(disponibles, totales)):
-            axes[0,0].text(i - width/2, disp + 0.1, str(disp), ha='center', fontweight='bold')
-            axes[0,0].text(i + width/2, total + 0.1, str(total), ha='center', fontweight='bold')
-        
-        # Gráfico 2: Técnicas por categoría (pie chart)
-        total_implementadas = sum(disponibles)
-        labels = ['Supervisadas', 'No Supervisadas']
-        sizes = disponibles
-        colors = ['#ff9999', '#66b3ff']
-        
-        axes[0,1].pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
-        axes[0,1].set_title('📊 Distribución de Técnicas Implementadas')
-        
-        # Gráfico 3: Progreso del proyecto
-        etapas = ['Análisis', 'Diseño', 'Implementación', 'Pruebas', 'Documentación']
-        progreso = [100, 100, (total_implementadas/11)*100, 80, 90]  # Porcentajes estimados
-        
-        axes[1,0].barh(etapas, progreso, color=['green', 'green', 'orange', 'yellow', 'lightblue'])
-        axes[1,0].set_xlabel('Progreso (%)')
-        axes[1,0].set_title('🚀 Progreso del Proyecto')
-        axes[1,0].set_xlim(0, 100)
-        
-        for i, v in enumerate(progreso):
-            axes[1,0].text(v + 1, i, f'{v:.0f}%', va='center', fontweight='bold')
-        
-        # Gráfico 4: Resumen de archivos generados
-        reportes_path = '/home/sedc/Proyectos/MineriaDeDatos/results/'
-        tipos_archivos = {'Gráficos': 0, 'Modelos': 0, 'Reportes': 0}
-        
-        for tipo, path in [('Gráficos', 'graficos/'), ('Modelos', 'modelos/'), ('Reportes', 'reportes/')]:
-            full_path = os.path.join(reportes_path, path)
-            if os.path.exists(full_path):
-                tipos_archivos[tipo] = len([f for f in os.listdir(full_path) if os.path.isfile(os.path.join(full_path, f))])
-        
-        axes[1,1].bar(tipos_archivos.keys(), tipos_archivos.values(), color=['purple', 'orange', 'green'])
-        axes[1,1].set_ylabel('Cantidad de Archivos')
-        axes[1,1].set_title('💾 Archivos Generados')
-        
-        for i, (tipo, cantidad) in enumerate(tipos_archivos.items()):
-            axes[1,1].text(i, cantidad + 0.5, str(cantidad), ha='center', fontweight='bold')
-        
-        plt.tight_layout()
-        dashboard_path = '/home/sedc/Proyectos/MineriaDeDatos/results/graficos/dashboard_ejecutivo.png'
-        plt.savefig(dashboard_path, dpi=150, bbox_inches='tight')
-        plt.show()
-        
-        print(f"💾 Dashboard guardado: {dashboard_path}")
-        
-        # Resumen textual
-        print(f"\n{Colores.CYAN}📋 RESUMEN EJECUTIVO:")
-        print(f"  🔬 Técnicas implementadas: {total_implementadas}/11 ({(total_implementadas/11)*100:.1f}%)")
-        print(f"  📁 Archivos generados: {sum(tipos_archivos.values())}")
-        print(f"  📊 Sistema {'COMPLETO' if total_implementadas == 11 else 'EN DESARROLLO'}")
-        
-        if total_implementadas >= 8:
-            print(f"  🎉 Proyecto en excelente estado")
-        elif total_implementadas >= 5:
-            print(f"  👍 Proyecto en buen progreso")
-        else:
-            print(f"  🔧 Proyecto requiere más desarrollo{Colores.FIN}")
-        
-    except ImportError:
-        print(f"{Colores.ROJO}❌ Matplotlib no disponible para generar dashboard{Colores.FIN}")
-    except Exception as e:
-        print(f"{Colores.ROJO}❌ Error generando dashboard: {e}{Colores.FIN}")
-
 def limpiar_resultados():
-    """Limpiar todos los resultados anteriores"""
+    """Limpieza optimizada de resultados"""
     print(f"\n{Colores.AMARILLO}🧹 LIMPIEZA DE RESULTADOS ANTERIORES{Colores.FIN}")
     
-    confirmacion = input(f"\n{Colores.ROJO}⚠️ ¿Estás seguro de borrar TODOS los resultados? (s/N): {Colores.FIN}").strip().lower()
+    confirmacion = input(f"\n{Colores.ROJO}⚠️ ¿Borrar TODOS los resultados? (s/N): {Colores.FIN}").strip().lower()
     if confirmacion not in ['s', 'si', 'sí', 'y', 'yes']:
         print(f"{Colores.AMARILLO}❌ Limpieza cancelada{Colores.FIN}")
         return
     
+    config = ConfiguracionSistema()
     rutas_limpiar = [
-        '/home/sedc/Proyectos/MineriaDeDatos/results/graficos/',
-        '/home/sedc/Proyectos/MineriaDeDatos/results/modelos/',
-        '/home/sedc/Proyectos/MineriaDeDatos/results/reportes/'
+        Path(config.RUTA_RESULTADOS) / 'graficos',
+        Path(config.RUTA_RESULTADOS) / 'modelos',
+        Path(config.RUTA_RESULTADOS) / 'reportes'
     ]
     
     archivos_borrados = 0
     
     for ruta in rutas_limpiar:
-        if os.path.exists(ruta):
-            for archivo in os.listdir(ruta):
-                archivo_path = os.path.join(ruta, archivo)
-                try:
-                    os.remove(archivo_path)
-                    archivos_borrados += 1
-                except Exception as e:
-                    print(f"  ❌ Error borrando {archivo}: {e}")
+        if ruta.exists():
+            for archivo in ruta.glob('*'):
+                if archivo.is_file():
+                    try:
+                        archivo.unlink()
+                        archivos_borrados += 1
+                    except Exception as e:
+                        print(f"  ❌ Error borrando {archivo.name}: {e}")
     
     print(f"\n{Colores.VERDE}✅ Limpieza completada")
     print(f"  🗑️ Archivos borrados: {archivos_borrados}")
     print(f"  📁 Carpetas mantenidas para nuevos resultados{Colores.FIN}")
 
-def exportar_proyecto():
-    """Crear backup completo del proyecto"""
-    print(f"\n{Colores.CYAN}💾 EXPORTANDO PROYECTO COMPLETO...{Colores.FIN}")
-    
-    try:
-        import shutil
-        from datetime import datetime
-        
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_name = f"MineriaDeDatos_Backup_{timestamp}"
-        backup_path = f"/home/sedc/Proyectos/{backup_name}"
-        
-        print(f"📦 Creando backup en: {backup_path}")
-        
-        # Copiar todo el proyecto
-        shutil.copytree('/home/sedc/Proyectos/MineriaDeDatos', backup_path)
-        
-        # Crear archivo comprimido
-        archivo_zip = f"{backup_path}.zip"
-        shutil.make_archive(backup_path, 'zip', '/home/sedc/Proyectos/', backup_name)
-        
-        # Borrar carpeta temporal
-        shutil.rmtree(backup_path)
-        
-        tamaño = os.path.getsize(archivo_zip) / 1024 / 1024
-        
-        print(f"\n{Colores.VERDE}✅ Backup creado exitosamente")
-        print(f"  📦 Archivo: {archivo_zip}")
-        print(f"  📏 Tamaño: {tamaño:.1f} MB")
-        print(f"  📅 Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{Colores.FIN}")
-        
-    except Exception as e:
-        print(f"{Colores.ROJO}❌ Error creando backup: {e}{Colores.FIN}")
-
-def configuracion_sistema():
-    """Mostrar configuración detallada del sistema"""
-    print(f"\n{Colores.CYAN}🔧 CONFIGURACIÓN Y DIAGNÓSTICO COMPLETO{Colores.FIN}\n")
-    
-    # Información del sistema
-    print(f"{Colores.NEGRITA}💻 Información del Sistema:{Colores.FIN}")
-    try:
-        import platform
-        print(f"  OS: {platform.system()} {platform.release()}")
-        print(f"  Arquitectura: {platform.machine()}")
-        print(f"  Python: {sys.version.split()[0]}")
-        print(f"  Directorio actual: {os.getcwd()}")
-    except Exception as e:
-        print(f"  ⚠️ Error obteniendo info del sistema: {e}")
-    
-    # Verificar librerías
-    print(f"\n{Colores.NEGRITA}🐍 Librerías de Python:{Colores.FIN}")
-    librerias_requeridas = {
-        'pandas': 'Manipulación de datos',
-        'numpy': 'Computación numérica',
-        'sklearn': 'Machine Learning',
-        'matplotlib': 'Gráficos básicos',
-        'seaborn': 'Gráficos estadísticos',
-        'scipy': 'Computación científica'
-    }
-    
-    for lib, descripcion in librerias_requeridas.items():
-        try:
-            modulo = __import__(lib)
-            version = getattr(modulo, '__version__', 'N/A')
-            print(f"  ✅ {lib} ({version}): {Colores.VERDE}{descripcion}{Colores.FIN}")
-        except ImportError:
-            print(f"  ❌ {lib}: {Colores.ROJO}NO instalado - {descripcion}{Colores.FIN}")
-    
-    # Verificar estructura completa
-    print(f"\n{Colores.NEGRITA}📁 Verificación Completa del Sistema:{Colores.FIN}")
-    datos_ok, supervisadas_disponibles, no_supervisadas_disponibles = verificar_archivos()
-    
-    # Recomendaciones
-    print(f"\n{Colores.NEGRITA}💡 Diagnóstico y Recomendaciones:{Colores.FIN}")
-    
-    total_tecnicas = supervisadas_disponibles + no_supervisadas_disponibles
-    
-    if not datos_ok:
-        print(f"  {Colores.ROJO}❌ CRÍTICO: Archivo de datos no encontrado{Colores.FIN}")
-        print(f"    💡 Verifica que el archivo CSV esté en: /home/sedc/Proyectos/MineriaDeDatos/data/")
-    
-    if total_tecnicas < 11:
-        print(f"  {Colores.AMARILLO}⚠️ ADVERTENCIA: Solo {total_tecnicas}/11 técnicas disponibles{Colores.FIN}")
-        print(f"    💡 Faltan {11-total_tecnicas} técnicas por implementar")
-    
-    if total_tecnicas == 11 and datos_ok:
-        print(f"  {Colores.VERDE}✅ EXCELENTE: Sistema completo configurado y listo{Colores.FIN}")
-        print(f"    🚀 Puedes ejecutar cualquier técnica sin problemas")
-        print(f"    🎯 Sistema integral de minería de datos operativo")
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 FUNCIÓN PRINCIPAL OPTIMIZADA
+# ═══════════════════════════════════════════════════════════════════
 
 def main():
-    """Función principal del menú actualizado"""
+    """Función principal optimizada del menú"""
+    registro = RegistroTecnicas()
+    
     while True:
-        limpiar_pantalla()
-        mostrar_banner()
-        mostrar_menu_principal()
-        
         try:
-            opcion = input(f"{Colores.AMARILLO}👉 Selecciona una opción (0-20): {Colores.FIN}").strip()
+            limpiar_pantalla()
+            mostrar_banner_optimizado()
+            mostrar_menu_principal_optimizado()
+            
+            opcion = input(f"{Colores.AMARILLO}👉 Selecciona una opción (0-23): {Colores.FIN}").strip()
             
             if opcion == '0':
                 print(f"\n{Colores.VERDE}👋 ¡Gracias por usar el Sistema Integral de Minería de Datos!")
                 print(f"🎓 ¡Éxito en tu proyecto de IA y Análisis de Datos!")
                 print(f"📧 Revisa los reportes generados para documentar tu trabajo{Colores.FIN}\n")
                 break
-                
-            elif opcion in [str(i) for i in range(1, 12)]:  # Técnicas individuales 1-11
-                tecnicas_nombres = {
-                    '1': ("🌳 Árboles de Decisión", "Clasificación interpretable con reglas de decisión"),
-                    '2': ("📏 Inducción de Reglas", "Generación automática de reglas IF-THEN"),
-                    '3': ("🎲 Clasificación Bayesiana", "Clasificación probabilística usando teorema de Bayes"),
-                    '4': ("👥 Basado en Ejemplares (K-NN)", "Clasificación por similitud con vecinos cercanos"),
-                    '5': ("🧠 Redes de Neuronas", "Aprendizaje profundo con múltiples arquitecturas"),
-                    '6': ("🌫️ Lógica Borrosa", "Clasificación con conjuntos difusos y reglas borrosas"),
-                    '7': ("🧬 Técnicas Genéticas", "Optimización evolutiva de características e hiperparámetros"),
-                    '8': ("🔗 A Priori", "Reglas de asociación - patrones si A entonces B"),
-                    '9': ("📊 Clustering Numérico", "Agrupación K-Means por similitud numérica"),
-                    '10': ("🎯 Clustering Conceptual", "Agrupación basada en conceptos y características"),
-                    '11': ("🎲 Clustering Probabilístico", "Agrupación EM con modelos probabilísticos")
-                }
-                
-                nombre, desc = tecnicas_nombres[opcion]
-                ejecutar_tecnica(int(opcion), nombre, desc)
-                
-            elif opcion == '12':
-                ejecutar_todas_las_tecnicas()
-                
-            elif opcion == '13':
-                ejecutar_solo_supervisadas()
-                
-            elif opcion == '14':
-                ejecutar_solo_no_supervisadas()
-                
+            
+            # Técnicas individuales (1-14)
+            elif opcion in [str(i) for i in range(1, 15)]:
+                tecnica_id = int(opcion)
+                ejecutar_tecnica_optimizada(tecnica_id)
+            
+            # Ejecutar todas las técnicas
             elif opcion == '15':
-                ver_resultados_guardados()
-                
+                todas_tecnicas = list(registro.tecnicas.values())
+                ejecutar_conjunto_tecnicas(todas_tecnicas, "SISTEMA COMPLETO")
+            
+            # Ejecutar solo supervisadas
             elif opcion == '16':
-                crear_ranking_tecnicas()
-                
+                supervisadas = registro.obtener_supervisadas()
+                ejecutar_conjunto_tecnicas(supervisadas, "TÉCNICAS SUPERVISADAS")
+            
+            # Ejecutar solo no supervisadas
             elif opcion == '17':
-                crear_dashboard_ejecutivo()
-                
+                no_supervisadas = registro.obtener_no_supervisadas()
+                ejecutar_conjunto_tecnicas(no_supervisadas, "TÉCNICAS NO SUPERVISADAS")
+            
+            # Ver resultados
             elif opcion == '18':
-                configuracion_sistema()
-                
+                ver_resultados_guardados()
+            
+            # Ranking de técnicas
             elif opcion == '19':
-                limpiar_resultados()
-                
+                crear_ranking_tecnicas()
+            
+            # Dashboard ejecutivo
             elif opcion == '20':
-                exportar_proyecto()
-                
+                print(f"{Colores.AMARILLO}📈 Dashboard ejecutivo en desarrollo...{Colores.FIN}")
+                # TODO: Implementar dashboard con matplotlib
+            
+            # Configuración y diagnóstico
+            elif opcion == '21':
+                verificar_sistema_completo()
+            
+            # Limpiar resultados
+            elif opcion == '22':
+                limpiar_resultados()
+            
+            # Exportar proyecto
+            elif opcion == '23':
+                print(f"{Colores.AMARILLO}💾 Exportación de proyecto en desarrollo...{Colores.FIN}")
+                # TODO: Implementar exportación con shutil
+            
             else:
-                print(f"{Colores.ROJO}❌ Opción inválida. Por favor selecciona un número del 0 al 20.{Colores.FIN}")
+                print(f"{Colores.ROJO}❌ Opción inválida. Selecciona un número del 0 al 23.{Colores.FIN}")
                 time.sleep(2)
             
             if opcion != '0':
-                input(f"\n{Colores.AMARILLO}📎 Presiona ENTER para volver al menú principal...{Colores.FIN}")
+                pausar_sistema("📎 Presiona ENTER para volver al menú principal...")
                 
         except KeyboardInterrupt:
-            print(f"\n\n{Colores.AMARILLO}⚠️  Operación cancelada por el usuario")
+            print(f"\n\n{Colores.AMARILLO}⚠️ Operación cancelada por el usuario")
             confirmacion = input(f"¿Deseas salir del sistema? (s/N): {Colores.FIN}").strip().lower()
             if confirmacion in ['s', 'si', 'sí', 'y', 'yes']:
                 print(f"{Colores.VERDE}👋 ¡Hasta luego!{Colores.FIN}\n")
                 break
         except Exception as e:
             print(f"\n{Colores.ROJO}❌ Error inesperado: {e}{Colores.FIN}")
-            input(f"{Colores.AMARILLO}📎 Presiona ENTER para continuar...{Colores.FIN}")
+            pausar_sistema("📎 Presiona ENTER para continuar...")
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔧 PUNTO DE ENTRADA OPTIMIZADO
+# ═══════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     # Verificar sistema antes de iniciar
     print(f"{Colores.CYAN}🔍 Inicializando Sistema Integral de Minería de Datos...{Colores.FIN}")
     time.sleep(1)
     
-    datos_ok, supervisadas_disponibles, no_supervisadas_disponibles = verificar_archivos()
-    total_tecnicas = supervisadas_disponibles + no_supervisadas_disponibles
-    
-    if datos_ok and total_tecnicas >= 1:
-        print(f"\n{Colores.VERDE}✅ Sistema inicializado correctamente")
-        print(f"📊 Datos: OK | Técnicas: {total_tecnicas}/11 ({supervisadas_disponibles} sup. + {no_supervisadas_disponibles} no sup.)")
+    try:
+        datos_ok, supervisadas_disponibles, no_supervisadas_disponibles = verificar_sistema_completo()
+        total_tecnicas = supervisadas_disponibles + no_supervisadas_disponibles
         
-        if total_tecnicas == 11:
-            print(f"🎉 ¡Sistema COMPLETO disponible!{Colores.FIN}")
-        elif total_tecnicas >= 8:
-            print(f"👍 Sistema casi completo{Colores.FIN}")
-        else:
-            print(f"🔧 Sistema en desarrollo{Colores.FIN}")
+        if datos_ok and total_tecnicas >= 1:
+            print(f"\n{Colores.VERDE}✅ Sistema inicializado correctamente")
+            print(f"📊 Datos: OK | Técnicas: {total_tecnicas}/14 ({supervisadas_disponibles} sup. + {no_supervisadas_disponibles} no sup.)")
             
-        time.sleep(2)
-        main()
-    else:
-        print(f"\n{Colores.ROJO}❌ Sistema no está completamente configurado")
-        print(f"📊 Datos: {'OK' if datos_ok else 'FALTA'} | Técnicas: {total_tecnicas}/11{Colores.FIN}")
-        
-        continuar = input(f"\n{Colores.AMARILLO}¿Deseas continuar de todas formas? (s/N): {Colores.FIN}").strip().lower()
-        if continuar in ['s', 'si', 'sí', 'y', 'yes']:
+            if total_tecnicas == 14:
+                print(f"🎉 ¡Sistema COMPLETO disponible!{Colores.FIN}")
+            elif total_tecnicas >= 10:
+                print(f"👍 Sistema casi completo{Colores.FIN}")
+            else:
+                print(f"🔧 Sistema en desarrollo{Colores.FIN}")
+                
+            time.sleep(2)
             main()
         else:
-            print(f"{Colores.AMARILLO}💡 Por favor configura el sistema y vuelve a intentar")
-            print(f"📋 Usa la opción 18 del menú para más detalles de configuración{Colores.FIN}")
+            print(f"\n{Colores.ROJO}❌ Sistema no está completamente configurado")
+            print(f"📊 Datos: {'OK' if datos_ok else 'FALTA'} | Técnicas: {total_tecnicas}/14{Colores.FIN}")
+            
+            continuar = input(f"\n{Colores.AMARILLO}¿Deseas continuar de todas formas? (s/N): {Colores.FIN}").strip().lower()
+            if continuar in ['s', 'si', 'sí', 'y', 'yes']:
+                main()
+            else:
+                print(f"{Colores.AMARILLO}💡 Configura el sistema y vuelve a intentar")
+                print(f"📋 Usa la opción 21 del menú para más detalles{Colores.FIN}")
+                
+    except Exception as e:
+        print(f"{Colores.ROJO}❌ Error crítico en inicialización: {e}{Colores.FIN}")
+        print(f"{Colores.AMARILLO}💡 Verifica la instalación del sistema{Colores.FIN}")

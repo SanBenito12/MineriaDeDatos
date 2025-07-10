@@ -1,0 +1,20 @@
+
+REPORTE ÁRBOLES DE DECISIÓN - CLASIFICACIÓN
+==========================================
+
+MEJOR MODELO: Árbol Profundo
+Precisión General: 0.960 (96.0%)
+Profundidad: 3 niveles
+Decisiones Finales: 5 hojas
+
+VARIABLES MÁS IMPORTANTES:
+1. P_15YMAS: 0.763
+2. VIVTOT: 0.237
+3. POBFEM: 0.000
+4. POBMAS: 0.000
+5. TOTHOG: 0.000
+
+DATOS UTILIZADOS:
+- Total registros: 69,084
+- Variables predictoras: 9
+- Categorías: 2
