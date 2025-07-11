@@ -109,7 +109,7 @@ def crear_visualizacion_regresion(resultados, mejor_nombre):
         return False
 
 # ═══════════════════════════════════════════════════════════════════
-# 🔧 FUNCIÓN PRINCIPAL (MANTENIENDO NOMBRE ORIGINAL)
+# 🔧 FUNCIÓN PRINCIPAL
 # ═══════════════════════════════════════════════════════════════════
 
 def ejecutar_regresion():
