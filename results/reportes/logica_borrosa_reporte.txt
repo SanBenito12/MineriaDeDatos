@@ -1,0 +1,34 @@
+
+REPORTE LÓGICA BORROSA - CLASIFICACIÓN
+====================================
+
+RESULTADOS:
+- Precisión: 0.680 (68.0%)
+- Reglas generadas: 2
+- Variables utilizadas: 8
+
+DATOS PROCESADOS:
+- Registros totales: 69,084
+- Muestra balanceada: 1,102
+- Entrenamiento: 771
+- Prueba: 331
+
+CONFIGURACIÓN BORROSA:
+- Conjuntos por variable: 3
+- Función de membresía: Triangular
+- Operador lógico: Mínimo (AND)
+
+REGLAS PRINCIPALES:
+
+Regla 1: Mediana (Confianza: 0.578)
+  - POBFEM es Bajo
+  - POBMAS es Medio
+  - TOTHOG es Bajo
+  - VIVTOT es Bajo
+  - P_15YMAS es 15YMAS
+  - GRAPROES es Medio
+  - PEA es Bajo
+  - POCUPADA es Bajo
+
+Regla 2: Pequeña (Confianza: 0.464)
+  - GRAPROES es Medio
