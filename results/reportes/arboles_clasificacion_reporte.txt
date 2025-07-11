@@ -1,0 +1,41 @@
+ÁRBOLES DE DECISIÓN - CLASIFICACIÓN
+==================================
+
+MEJOR MODELO: Random Forest
+Precisión (Accuracy): 1.000 (100.0%)
+
+COMPARACIÓN MODELOS:
+
+Decision Tree: Accuracy = 1.000
+Random Forest: Accuracy = 1.000
+
+MÉTRICAS POR CLASE (Random Forest):
+Pequeña: Precision=1.000, Recall=1.000, F1=1.000, N=20695.0
+Mediana: Precision=0.886, Recall=1.000, F1=0.939, N=31.0
+
+IMPORTANCIA VARIABLES (Random Forest):
+- POBFEM: 0.365
+- POBMAS: 0.303
+- TOTHOG: 0.012
+- VIVTOT: 0.025
+- P_15YMAS: 0.107
+- P_60YMAS: 0.001
+- GRAPROES: 0.001
+- PEA: 0.098
+- POCUPADA: 0.087
+
+DATOS UTILIZADOS:
+- Total registros: 69,084
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS, GRAPROES, PEA, POCUPADA
+- División: 70% entrenamiento, 30% prueba
+
+CATEGORÍAS DE POBLACIÓN:
+- Pequeña: ≤ 500 habitantes
+- Mediana: 501 - 2,000 habitantes  
+- Grande: 2,001 - 8,000 habitantes
+- Muy Grande: > 8,000 habitantes
+
+INTERPRETACIÓN:
+- Los árboles pueden identificar patrones para clasificar comunidades
+- Son interpretables: se pueden ver las reglas de decisión
+- Útil para políticas públicas diferenciadas por tipo de comunidad

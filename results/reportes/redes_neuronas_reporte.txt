@@ -1,42 +1,75 @@
+REDES NEURONALES - CLASIFICACIÓN
+===============================
 
-REPORTE REDES NEURONALES - CLASIFICACIÓN
-=======================================
+MEJOR RED: Red Simple
+Descripción: Una capa oculta con 20 neuronas
+Precisión (Accuracy): 0.999 (99.9%)
+Arquitectura: (20,)
+Activación: relu
+Parámetros totales: 242
 
-MEJOR RED: Red Tanh
-Descripción: Activación tangente hiperbólica
-Precisión: 0.999 (99.9%)
-Arquitectura: (25, 15)
-Activación: tanh
-Solver: lbfgs
-Parámetros totales: 672
+COMPARACIÓN ARQUITECTURAS:
 
-CONVERGENCIA:
-
-
-COMPARACIÓN DE ARQUITECTURAS:
-
+Red Simple:
+  - Precisión: 0.999
+  - Arquitectura: (20,)
+  - Activación: relu
+  - Parámetros: 242
+  - Convergencia: ✅ Convergió (60 iter)
+Red Profunda:
+  - Precisión: 0.999
+  - Arquitectura: (30, 15)
+  - Activación: relu
+  - Parámetros: 797
+  - Convergencia: ✅ Convergió (64 iter)
 Red Tanh:
   - Precisión: 0.999
-  - Arquitectura: (25, 15)
+  - Arquitectura: (25,)
   - Activación: tanh
-  - Parámetros: 672
+  - Parámetros: 302
+  - Convergencia: ✅ Convergió (83 iter)
 
-VARIABLES UTILIZADAS:
-POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS, GRAPROES, PEA, POCUPADA
+MÉTRICAS POR CLASE (Red Simple):
+Mediana: Precision=0.958, Recall=1.000, F1=0.979, N=23.0
+Pequeña: Precision=1.000, Recall=1.000, F1=1.000, N=876.0
 
-CONFIGURACIÓN:
-- Neuronas de entrada: 9
-- Clases de salida: 2
-- Datos de entrenamiento: 2,100
-- Datos de prueba: 900
+DATOS UTILIZADOS:
+- Total registros: 3,000
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS, GRAPROES, PEA, POCUPADA
+- División: 70% entrenamiento, 30% prueba
 
-DATOS PROCESADOS:
-- Registros originales: 69,084
-- Muestra balanceada: 3,000
-- Muestreo estratificado aplicado
+CONFIGURACIÓN REDES:
+- Escalado aplicado: StandardScaler
+- Solver: lbfgs (optimización limitada)
+- Regularización: L2 (alpha)
+- Inicialización: aleatoria con semilla fija
 
-NOTAS:
-- Se aplicó escalado estándar a todas las variables
-- Se utilizó early stopping para evitar overfitting
-- Se reservó 20% de datos de entrenamiento para validación
-- Umbrales ajustados para mejor distribución de clases
+PRINCIPIO REDES NEURONALES:
+- Neuronas artificiales conectadas en capas
+- Cada neurona aplica función de activación
+- Aprende patrones complejos no lineales
+- Backpropagation para ajustar pesos
+
+FUNCIONES DE ACTIVACIÓN:
+- ReLU: f(x) = max(0, x) - elimina negativos
+- Tanh: f(x) = tanh(x) - salida entre -1 y 1
+- Cada una captura diferentes tipos de patrones
+
+VENTAJAS:
+- Puede aprender patrones muy complejos
+- Versátil para diferentes tipos de problemas
+- Buena capacidad de generalización
+- Funciona bien con grandes datasets
+
+DESVENTAJAS:
+- "Caja negra" - difícil de interpretar
+- Requiere mucho ajuste de hiperparámetros
+- Sensible al overfitting
+- Computacionalmente intensivo
+
+APLICACIONES:
+- Reconocimiento de imágenes
+- Procesamiento de lenguaje natural
+- Diagnóstico médico
+- Predicción financiera
+- Sistemas de recomendación

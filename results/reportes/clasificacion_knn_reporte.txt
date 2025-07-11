@@ -1,0 +1,65 @@
+CLASIFICACIÓN BASADA EN EJEMPLARES (K-NN) - REPORTE
+==================================================
+
+MEJOR MODELO: K-NN Ponderado (K=7)
+Precisión (Accuracy): 0.999 (99.9%)
+K Óptimo encontrado: 3
+K utilizado: 7
+Ponderación: distance
+
+BÚSQUEDA DE K ÓPTIMO:
+- Mejor K encontrado: 3
+- Mejor score CV: 1.000
+
+COMPARACIÓN CONFIGURACIONES:
+
+K-NN Óptimo (K=3):
+  - Precisión: 0.999
+  - K: 3
+  - Weights: distance
+K-NN Clásico (K=5):
+  - Precisión: 0.999
+  - K: 5
+  - Weights: uniform
+K-NN Ponderado (K=7):
+  - Precisión: 0.999
+  - K: 7
+  - Weights: distance
+
+MÉTRICAS POR CLASE (K-NN Ponderado (K=7)):
+Mediana: Precision=1.000, Recall=0.667, F1=0.800, N=3.0
+Pequeña: Precision=0.999, Recall=1.000, F1=1.000, N=1497.0
+
+DATOS UTILIZADOS:
+- Total registros: 5,000
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS, GRAPROES, PEA, POCUPADA, PDESOCUP
+- División: 70% entrenamiento, 30% prueba
+
+CONFIGURACIÓN K-NN:
+- Métrica de distancia: Euclidiana
+- Escalado aplicado: StandardScaler
+- Validación cruzada: 5-fold para encontrar K óptimo
+
+PRINCIPIO K-NN:
+- Clasifica según la mayoría de los K vecinos más cercanos
+- No requiere entrenamiento (lazy learning)
+- Se adapta automáticamente a nuevos datos
+- Sensible a la escala de las variables (por eso se escala)
+
+VENTAJAS:
+- Simple de entender e implementar
+- No hace suposiciones sobre la distribución de datos
+- Funciona bien con datos no lineales
+- Se adapta a cambios en los datos
+
+DESVENTAJAS:
+- Computacionalmente costoso para predicción
+- Sensible al ruido y datos irrelevantes
+- Sufre con alta dimensionalidad
+- Requiere mucha memoria
+
+APLICACIONES:
+- Sistemas de recomendación
+- Reconocimiento de patrones
+- Clasificación de imágenes
+- Análisis de similitud

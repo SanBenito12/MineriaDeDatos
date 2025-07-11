@@ -1,197 +1,115 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-REGRESIÓN LINEAL - Versión Optimizada
-Predice la población total usando otras variables demográficas
+REGRESIÓN LINEAL - OPTIMIZADO
+Predice población total con +90% de precisión (R²)
 """
 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.linear_model import Ridge, Lasso, ElasticNet
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
-# ═══════════════════════════════════════════════════════════════════
-# 🔧 CONFIGURACIÓN Y UTILIDADES OPTIMIZADAS
-# ═══════════════════════════════════════════════════════════════════
-
-def cargar_datos_regresion():
-    """Carga y prepara datos de manera optimizada"""
-    archivo = 'data/ceros_sin_columnasAB_limpio_weka.csv'
+def ejecutar_regresion():
+    """Regresión Lineal Optimizada para +90% R²"""
+    print("🔵 REGRESIÓN LINEAL")
+    
+    # 1. CARGAR DATOS
     try:
-        datos = pd.read_csv(archivo)
-        return datos
+        datos = pd.read_csv('data/ceros_sin_columnasAB_limpio_weka.csv')
     except:
-        print(f"❌ No se encontró el archivo: {archivo}")
-        return None
-
-def preparar_variables_regresion(datos):
-    """Selecciona y prepara variables para regresión"""
-    variables_predictoras = ['POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT']
-    variables_disponibles = [v for v in variables_predictoras if v in datos.columns]
+        print("❌ Error: archivo no encontrado")
+        return
     
-    if len(variables_disponibles) < 2:
-        return None, None, None
+    # 2. VARIABLES OPTIMIZADAS
+    variables = ['POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT']
+    variables_disponibles = [v for v in variables if v in datos.columns]
     
-    # Preparar datos limpios
     datos_limpios = datos[variables_disponibles + ['POBTOT']].dropna()
+    
+    # Muestra optimizada para velocidad
+    if len(datos_limpios) > 5000:
+        datos_limpios = datos_limpios.sample(n=5000, random_state=42)
+    
     X = datos_limpios[variables_disponibles]
     y = datos_limpios['POBTOT']
     
-    return X, y, variables_disponibles
-
-def evaluar_modelo_regresion(modelo, X_test, y_test, nombre):
-    """Evaluación estandarizada de modelos de regresión"""
-    y_pred = modelo.predict(X_test)
-    precision = r2_score(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
+    print(f"📊 Variables: {len(variables_disponibles)} | Registros: {len(X):,}")
     
-    return {
-        'modelo': modelo,
-        'precision': precision,
-        'predicciones': y_pred,
-        'mse': mse
-    }
-
-def crear_visualizacion_regresion(resultados, mejor_nombre):
-    """Crear visualización optimizada para regresión"""
-    try:
-        plt.figure(figsize=(12, 5))
-        
-        # Gráfico 1: Comparación de modelos
-        plt.subplot(1, 2, 1)
-        nombres = list(resultados.keys())
-        precisiones = [resultados[m]['precision'] for m in nombres]
-        colores = ['lightblue', 'lightgreen', 'orange']
-        
-        barras = plt.bar(range(len(nombres)), precisiones, color=colores)
-        plt.title('📊 Precisión por Modelo', fontsize=12, fontweight='bold')
-        plt.ylabel('Precisión (R²)')
-        plt.xticks(range(len(nombres)), nombres, rotation=45, ha='right')
-        plt.ylim(0, 1)
-        
-        # Añadir valores en las barras
-        for i, precision in enumerate(precisiones):
-            plt.text(i, precision + 0.02, f'{precision:.3f}', 
-                    ha='center', fontweight='bold')
-        
-        # Gráfico 2: Predicciones vs Realidad (mejor modelo)
-        plt.subplot(1, 2, 2)
-        mejor_pred = resultados[mejor_nombre]['predicciones']
-        
-        # Simular y_test para visualización (en implementación real usar y_test real)
-        y_test_sim = mejor_pred + np.random.normal(0, np.std(mejor_pred)*0.1, len(mejor_pred))
-        
-        plt.scatter(y_test_sim, mejor_pred, alpha=0.6, color='blue', s=20)
-        
-        # Línea de predicción perfecta
-        min_val = min(y_test_sim.min(), mejor_pred.min())
-        max_val = max(y_test_sim.max(), mejor_pred.max())
-        plt.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2, 
-                label='Predicción Perfecta')
-        
-        plt.xlabel('Población Real')
-        plt.ylabel('Población Predicha')
-        plt.title(f'🎯 {mejor_nombre}\nPredicciones vs Realidad', fontsize=12, fontweight='bold')
-        plt.legend()
-        
-        plt.tight_layout()
-        plt.savefig('regresion_resultados.png', dpi=150, bbox_inches='tight')
-        plt.show()
-        
-        return True
-    except Exception as e:
-        print(f"⚠️ No se pudo crear el gráfico: {e}")
-        return False
-
-# ═══════════════════════════════════════════════════════════════════
-# 🔧 FUNCIÓN PRINCIPAL
-# ═══════════════════════════════════════════════════════════════════
-
-def ejecutar_regresion():
-    """FUNCIÓN PRINCIPAL - Mantiene compatibilidad con menú"""
-    print("🔵 REGRESIÓN LINEAL")
-    print("="*30)
-    print("📝 Objetivo: Predecir POBLACIÓN TOTAL usando otras variables")
-    print()
+    # 3. DIVISIÓN Y ESCALADO
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    # 1. CARGAR DATOS
-    datos = cargar_datos_regresion()
-    if datos is None:
-        return
-    
-    print(f"✅ Datos cargados: {datos.shape[0]:,} filas")
-    
-    # 2. PREPARAR VARIABLES
-    X, y, variables_disponibles = preparar_variables_regresion(datos)
-    if X is None:
-        print("❌ No hay suficientes variables para el análisis")
-        return
-    
-    print(f"📊 Variables usadas: {', '.join(variables_disponibles)}")
-    print(f"🧹 Datos limpios: {len(X):,} registros")
-    
-    # 3. DIVIDIR EN ENTRENAMIENTO Y PRUEBA
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-    
-    # 4. ESCALAR DATOS
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    print(f"📈 Entrenamiento: {len(X_train):,} | Prueba: {len(X_test):,}")
-    print()
-    
-    # 5. ENTRENAR MODELOS DE REGRESIÓN
+    # 4. MODELOS OPTIMIZADOS
     modelos = {
-        'Lineal Simple': LinearRegression(),
-        'Ridge (L2)': Ridge(alpha=1.0),
-        'Lasso (L1)': Lasso(alpha=1.0, max_iter=1000)
+        'Ridge': Ridge(alpha=0.1),
+        'Lasso': Lasso(alpha=0.01, max_iter=2000),
+        'ElasticNet': ElasticNet(alpha=0.01, l1_ratio=0.5, max_iter=2000)
     }
     
-    print("🤖 ENTRENANDO MODELOS...")
-    resultados = {}
+    mejor_precision = 0
+    mejor_nombre = ""
+    mejor_modelo = None
     
     for nombre, modelo in modelos.items():
-        # Entrenar modelo
         modelo.fit(X_train_scaled, y_train)
+        y_pred = modelo.predict(X_test_scaled)
+        precision = r2_score(y_test, y_pred)
         
-        # Evaluar modelo
-        resultado = evaluar_modelo_regresion(modelo, X_test_scaled, y_test, nombre)
-        resultados[nombre] = resultado
-        
-        print(f"   {nombre:15} → Precisión: {resultado['precision']:.3f} ({resultado['precision']*100:.1f}%)")
+        if precision > mejor_precision:
+            mejor_precision = precision
+            mejor_nombre = nombre
+            mejor_modelo = modelo
     
-    # 6. ENCONTRAR EL MEJOR MODELO
-    mejor_nombre = max(resultados.keys(), key=lambda x: resultados[x]['precision'])
-    mejor_precision = resultados[mejor_nombre]['precision']
+    # 5. VISUALIZACIÓN IDEAL: RESIDUOS + PREDICCIÓN
+    y_pred_final = mejor_modelo.predict(X_test_scaled)
+    residuos = y_test - y_pred_final
     
-    print()
-    print(f"🏆 MEJOR MODELO: {mejor_nombre}")
-    print(f"   Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)")
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
     
-    # 7. CREAR VISUALIZACIÓN
-    print("💾 Gráfico guardado: regresion_resultados.png")
-    crear_visualizacion_regresion(resultados, mejor_nombre)
+    # Gráfico 1: Predicción vs Real
+    ax1.scatter(y_test, y_pred_final, alpha=0.6, color='blue', s=30)
+    min_val = min(y_test.min(), y_pred_final.min())
+    max_val = max(y_test.max(), y_pred_final.max())
+    ax1.plot([min_val, max_val], [min_val, max_val], 'r--', linewidth=2, label='Predicción Perfecta')
+    ax1.set_xlabel('Población Real')
+    ax1.set_ylabel('Población Predicha')
+    ax1.set_title(f'🎯 Precisión: R² = {mejor_precision:.3f}')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
     
-    # 8. EXPLICACIÓN FINAL
-    print()
-    print("📝 EXPLICACIÓN:")
-    print(f"   • El modelo {mejor_nombre} es el más preciso")
-    print(f"   • Puede explicar el {mejor_precision*100:.1f}% de la variación en población")
+    # Gráfico 2: RESIDUOS (más revelador)
+    ax2.scatter(y_pred_final, residuos, alpha=0.6, color='red', s=30)
+    ax2.axhline(y=0, color='black', linestyle='--', linewidth=1)
+    ax2.set_xlabel('Valores Predichos')
+    ax2.set_ylabel('Residuos (Real - Predicho)')
+    ax2.set_title(f'📊 Análisis de Errores\n{mejor_nombre}')
+    ax2.grid(True, alpha=0.3)
     
-    if mejor_precision > 0.8:
-        print("   • ¡Excelente precisión! 🎉")
-    elif mejor_precision > 0.6:
-        print("   • Buena precisión 👍")
-    else:
-        print("   • Precisión moderada, se puede mejorar 🔧")
+    # Estadísticas útiles
+    rmse = np.sqrt(np.mean(residuos**2))
+    mae = np.mean(np.abs(residuos))
     
-    print("✅ REGRESIÓN LINEAL COMPLETADA")
+    fig.suptitle(f'🔵 REGRESIÓN LINEAL - RMSE: {rmse:.0f} | MAE: {mae:.0f}', fontsize=14, fontweight='bold')
+    plt.tight_layout()
+    plt.savefig('regresion_analisis.png', dpi=150, bbox_inches='tight')
+    plt.show()
+    
+    print(f"🎯 Mejor modelo: {mejor_nombre}")
+    print(f"🎯 Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)")
+    print(f"📊 RMSE: {rmse:.0f} | MAE: {mae:.0f}")
+    print("💾 Gráfico guardado: regresion_analisis.png")
+    print("✅ Regresión completada")
+    
+    return mejor_precision
 
 if __name__ == "__main__":
     ejecutar_regresion()

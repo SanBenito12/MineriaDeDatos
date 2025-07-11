@@ -1,0 +1,28 @@
+REGRESIÓN LINEAL - REPORTE
+========================
+
+MEJOR MODELO: Ridge
+Precisión (R²): 0.903 (90.3%)
+
+COMPARACIÓN MODELOS:
+
+Linear:
+  - R²: 0.903
+  - MSE: 400
+  - MAE: 1
+Ridge:
+  - R²: 0.903
+  - MSE: 400
+  - MAE: 1
+Lasso:
+  - R²: 0.903
+  - MSE: 401
+  - MAE: 2
+
+DATOS UTILIZADOS:
+- Total registros: 69,084
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS
+- División: 70% entrenamiento, 30% prueba
+
+INTERPRETACIÓN:
+- R² = 0.903 significa que el modelo explica 90.3% de la variación

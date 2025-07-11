@@ -1,0 +1,61 @@
+LÓGICA BORROSA - CLASIFICACIÓN
+=============================
+
+RESULTADO:
+Precisión: 0.592 (59.2%)
+Reglas generadas: 2
+Variables utilizadas: 8
+
+REGLAS BORROSAS PRINCIPALES:
+
+Regla 1: Mediana (Confianza: 0.583)
+  - POBFEM es Bajo (grado: 0.554)
+  - POBMAS es Bajo (grado: 0.594)
+  - TOTHOG es Bajo (grado: 0.633)
+  - VIVTOT es Bajo (grado: 0.646)
+  - P_15YMAS es 15YMAS (grado: 0.501)
+  - GRAPROES es Medio (grado: 0.573)
+  - PEA es Bajo (grado: 0.577)
+  - POCUPADA es Bajo (grado: 0.585)
+
+Regla 2: Pequeña (Confianza: 0.447)
+  - GRAPROES es Medio (grado: 0.447)
+
+MÉTRICAS POR CLASE:
+Mediana: Precision=0.408, Recall=0.527, F1=0.460
+Pequeña: Precision=0.729, Recall=0.625, F1=0.673
+
+CONFIGURACIÓN BORROSA:
+- Conjuntos por variable: 3
+- Función de membresía: Triangular
+- Operador lógico: Mínimo (AND)
+
+DATOS UTILIZADOS:
+- Total registros: 1,494
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, GRAPROES, PEA, POCUPADA
+- División: 70% entrenamiento, 30% prueba
+
+CARACTERÍSTICAS LÓGICA BORROSA:
+- Maneja incertidumbre y vaguedad
+- Reglas interpretables en lenguaje natural
+- Grados de pertenencia en lugar de clasificación binaria
+- Útil cuando los límites entre clases son difusos
+
+VENTAJAS:
+- Muy interpretable y explicable
+- Maneja bien la incertidumbre
+- Conocimiento experto fácil de incorporar
+- Reglas en lenguaje natural
+
+DESVENTAJAS:
+- Requiere definición cuidadosa de conjuntos
+- Puede ser subjetivo en la configuración
+- Escalabilidad limitada con muchas variables
+- Rendimiento puede ser menor que métodos precisos
+
+APLICACIONES:
+- Sistemas de control (temperatura, velocidad)
+- Diagnóstico médico con síntomas vagos
+- Evaluación de riesgo crediticio
+- Sistemas de recomendación
+- Control de calidad con criterios subjetivos

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CLASIFICACIÓN BAYESIANA
-Usa probabilidades para clasificar poblaciones
+CLASIFICACIÓN BAYESIANA - Naive Bayes
 """
 
 import pandas as pd
@@ -13,23 +12,41 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
-import warnings
-warnings.filterwarnings('ignore')
+
+def cargar_datos():
+    """Carga el dataset principal"""
+    return pd.read_csv('data/ceros_sin_columnasAB_limpio_weka.csv')
 
 def crear_categorias_poblacion(poblacion):
-    """Crear categorías de población para clasificación"""
-    if poblacion <= 1000:
+    """Crea categorías de población para clasificación"""
+    if poblacion <= 500:
         return 'Pequeña'
-    elif poblacion <= 5000:
+    elif poblacion <= 2000:
         return 'Mediana'
-    elif poblacion <= 20000:
+    elif poblacion <= 8000:
         return 'Grande'
     else:
-        return 'Muy Grande'
+        return 'Muy_Grande'
 
-def calcular_probabilidades_clase(y):
-    """Calcular probabilidades a priori de cada clase"""
-    conteos = pd.Series(y).value_counts()
+def preparar_datos(datos):
+    """Prepara variables para clasificación bayesiana"""
+    variables = ['POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT', 'P_15YMAS', 'P_60YMAS', 'GRAPROES', 'PEA', 'POCUPADA', 'PDESOCUP']
+    variables_disponibles = [v for v in variables if v in datos.columns]
+    
+    # Crear variable objetivo categórica
+    datos['CATEGORIA_POB'] = datos['POBTOT'].apply(crear_categorias_poblacion)
+    
+    # Dataset limpio
+    df = datos[variables_disponibles + ['CATEGORIA_POB']].dropna()
+    
+    X = df[variables_disponibles]
+    y = df['CATEGORIA_POB']
+    
+    return X, y, variables_disponibles
+
+def calcular_probabilidades_priori(y):
+    """Calcula probabilidades a priori de cada clase"""
+    conteos = y.value_counts()
     total = len(y)
     probabilidades = {}
     
@@ -39,77 +56,25 @@ def calcular_probabilidades_clase(y):
     
     return probabilidades
 
-def ejecutar_clasificacion_bayesiana():
-    print("🎲 CLASIFICACIÓN BAYESIANA")
-    print("="*40)
-    print("📝 Objetivo: Clasificar usando probabilidades y teorema de Bayes")
-    print()
+def entrenar_modelos_bayesianos(X_train, X_test, y_train, y_test):
+    """Entrena diferentes modelos Naive Bayes"""
     
-    # 1. CARGAR DATOS
-    archivo = '/home/sedc/Proyectos/MineriaDeDatos/data/ceros_sin_columnasAB_limpio_weka.csv'
-    try:
-        datos = pd.read_csv(archivo)
-        print(f"✅ Datos cargados: {datos.shape[0]:,} filas, {datos.shape[1]} columnas")
-    except Exception as e:
-        print(f"❌ Error cargando datos: {e}")
-        return
+    # Preparar datos para diferentes tipos de Naive Bayes
     
-    # 2. SELECCIONAR VARIABLES PREDICTORAS
-    variables_predictoras = [
-        'POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT', 'P_15YMAS', 
-        'P_60YMAS', 'GRAPROES', 'PEA', 'POCUPADA', 'PDESOCUP'
-    ]
-    
-    variables_disponibles = [v for v in variables_predictoras if v in datos.columns]
-    
-    if len(variables_disponibles) < 3:
-        print("❌ No hay suficientes variables para clasificación bayesiana")
-        return
-    
-    print(f"📊 Variables usadas: {', '.join(variables_disponibles)}")
-    
-    # 3. CREAR VARIABLE OBJETIVO
-    datos['CATEGORIA_POB'] = datos['POBTOT'].apply(crear_categorias_poblacion)
-    
-    # 4. PREPARAR DATOS
-    datos_limpios = datos[variables_disponibles + ['CATEGORIA_POB']].dropna()
-    X = datos_limpios[variables_disponibles]
-    y = datos_limpios['CATEGORIA_POB']
-    
-    print(f"🧹 Datos limpios: {len(datos_limpios):,} registros")
-    
-    # 5. CALCULAR PROBABILIDADES A PRIORI
-    prob_priori = calcular_probabilidades_clase(y)
-    print()
-    print("🎯 PROBABILIDADES A PRIORI:")
-    for clase, prob in prob_priori.items():
-        print(f"   P({clase:12}) = {prob:.3f} ({prob*100:.1f}%)")
-    
-    # 6. DIVIDIR DATOS
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=42, stratify=y
-    )
-    
-    print(f"\n📊 Entrenamiento: {len(X_train):,} | Prueba: {len(X_test):,}")
-    print()
-    
-    # 7. PREPARAR DATOS PARA DIFERENTES MODELOS BAYESIANOS
-    
-    # Para Gaussian Naive Bayes (datos continuos)
+    # 1. Para Gaussian NB (datos continuos)
     scaler_gaussian = StandardScaler()
     X_train_gaussian = scaler_gaussian.fit_transform(X_train)
     X_test_gaussian = scaler_gaussian.transform(X_test)
     
-    # Para Multinomial Naive Bayes (datos discretos positivos)
+    # 2. Para Multinomial NB (datos discretos positivos)
     scaler_multinomial = MinMaxScaler()
     X_train_multinomial = scaler_multinomial.fit_transform(X_train)
     X_test_multinomial = scaler_multinomial.transform(X_test)
     
-    # Para Bernoulli Naive Bayes (datos binarios)
+    # 3. Para Bernoulli NB (datos binarios)
     X_train_bernoulli = (X_train > X_train.median()).astype(int)
     X_test_bernoulli = (X_test > X_train.median()).astype(int)
     
-    # 8. ENTRENAR DIFERENTES MODELOS BAYESIANOS
     modelos = {
         'Gaussiano': {
             'modelo': GaussianNB(),
@@ -131,12 +96,9 @@ def ejecutar_clasificacion_bayesiana():
         }
     }
     
-    print("🧠 ENTRENANDO MODELOS BAYESIANOS...")
     resultados = {}
     
     for nombre, config in modelos.items():
-        print(f"   🔄 Entrenando {nombre} Naive Bayes...")
-        
         try:
             # Entrenar modelo
             modelo = config['modelo']
@@ -147,262 +109,247 @@ def ejecutar_clasificacion_bayesiana():
             y_pred_proba = modelo.predict_proba(config['X_test'])
             
             # Métricas
-            precision = accuracy_score(y_test, y_pred)
-            
             resultados[nombre] = {
                 'modelo': modelo,
-                'precision': precision,
+                'accuracy': accuracy_score(y_test, y_pred),
                 'predicciones': y_pred,
                 'probabilidades': y_pred_proba,
                 'descripcion': config['descripcion']
             }
             
-            print(f"   ✅ {nombre:12} → Precisión: {precision:.3f} ({precision*100:.1f}%)")
-            
         except Exception as e:
-            print(f"   ❌ Error en {nombre}: {e}")
+            print(f"    ❌ Error en {nombre}: {str(e)[:50]}...")
+            continue
     
-    if not resultados:
-        print("❌ No se pudo entrenar ningún modelo bayesiano")
-        return
-    
-    # 9. ENCONTRAR EL MEJOR MODELO
-    mejor_nombre = max(resultados.keys(), key=lambda x: resultados[x]['precision'])
-    mejor_modelo = resultados[mejor_nombre]['modelo']
-    mejor_precision = resultados[mejor_nombre]['precision']
-    
-    print()
-    print(f"🏆 MEJOR MODELO: {mejor_nombre} Naive Bayes")
-    print(f"   Descripción: {resultados[mejor_nombre]['descripcion']}")
-    print(f"   Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)")
-    
-    # 10. ANÁLISIS DETALLADO DEL MEJOR MODELO
-    print()
-    print("📊 ANÁLISIS DETALLADO:")
-    y_pred_mejor = resultados[mejor_nombre]['predicciones']
-    
-    # Reporte por clase
-    print("\n🎯 Métricas por Categoría:")
-    reporte = classification_report(y_test, y_pred_mejor, output_dict=True)
-    for categoria in ['Pequeña', 'Mediana', 'Grande', 'Muy Grande']:
-        if categoria in reporte:
-            precision = reporte[categoria]['precision']
-            recall = reporte[categoria]['recall']
-            f1 = reporte[categoria]['f1-score']
-            print(f"   {categoria:12}: Prec={precision:.3f} | Rec={recall:.3f} | F1={f1:.3f}")
-    
-    # 11. ANÁLISIS DE PROBABILIDADES
-    print()
-    print("🎲 ANÁLISIS DE PROBABILIDADES:")
-    
-    # Obtener probabilidades del mejor modelo
-    probabilidades = resultados[mejor_nombre]['probabilidades']
-    clases = mejor_modelo.classes_
+    return resultados
+
+def analizar_probabilidades(resultados, y_test):
+    """Analiza las probabilidades de predicción"""
+    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
+    probabilidades = resultados[mejor]['probabilidades']
+    clases = resultados[mejor]['modelo'].classes_
     
     # Confianza promedio por clase
-    print("\n📈 Confianza Promedio por Predicción:")
+    analisis = {}
+    y_pred_mejor = resultados[mejor]['predicciones']
+    
     for i, clase in enumerate(clases):
         indices_clase = np.where(y_pred_mejor == clase)[0]
         if len(indices_clase) > 0:
             confianza_promedio = np.mean(probabilidades[indices_clase, i])
-            print(f"   {clase:12}: {confianza_promedio:.3f} ({confianza_promedio*100:.1f}%)")
+            analisis[clase] = {
+                'confianza_promedio': confianza_promedio,
+                'predicciones_clase': len(indices_clase)
+            }
     
-    # 12. VISUALIZACIONES
-    try:
-        fig = plt.figure(figsize=(16, 12))
-        
-        # Gráfico 1: Comparación de precisión entre modelos
-        plt.subplot(3, 3, 1)
-        nombres = list(resultados.keys())
-        precisiones = [resultados[m]['precision'] for m in nombres]
-        colores = ['lightblue', 'lightgreen', 'orange']
-        
-        barras = plt.bar(nombres, precisiones, color=colores[:len(nombres)])
-        plt.title('🎲 Precisión por Modelo Bayesiano', fontweight='bold')
-        plt.ylabel('Precisión')
-        plt.xticks(rotation=45)
-        plt.ylim(0, 1)
-        
-        for i, (barra, precision) in enumerate(zip(barras, precisiones)):
-            plt.text(i, precision + 0.02, f'{precision:.3f}', ha='center', fontweight='bold')
-        
-        # Gráfico 2: Matriz de confusión del mejor modelo
-        plt.subplot(3, 3, 2)
-        cm = confusion_matrix(y_test, y_pred_mejor)
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                   xticklabels=clases, yticklabels=clases)
-        plt.title(f'🎯 Matriz de Confusión\n{mejor_nombre} NB', fontweight='bold')
-        plt.xlabel('Predicción')
-        plt.ylabel('Real')
-        
-        # Gráfico 3: Distribución de probabilidades a priori
-        plt.subplot(3, 3, 3)
-        clases_priori = list(prob_priori.keys())
-        probs_priori = list(prob_priori.values())
-        plt.pie(probs_priori, labels=clases_priori, autopct='%1.1f%%', startangle=90)
-        plt.title('📊 Probabilidades A Priori', fontweight='bold')
-        
-        # Gráfico 4: Distribución de confianza de predicciones
-        plt.subplot(3, 3, 4)
-        max_probs = np.max(probabilidades, axis=1)
-        plt.hist(max_probs, bins=20, alpha=0.7, color='purple', edgecolor='black')
-        plt.title('📈 Distribución de Confianza', fontweight='bold')
-        plt.xlabel('Confianza Máxima')
-        plt.ylabel('Frecuencia')
-        
-        # Gráfico 5: Comparación de F1-Score por clase
-        plt.subplot(3, 3, 5)
-        f1_scores = []
-        categorias_f1 = []
-        for categoria in ['Pequeña', 'Mediana', 'Grande', 'Muy Grande']:
-            if categoria in reporte:
-                f1_scores.append(reporte[categoria]['f1-score'])
-                categorias_f1.append(categoria)
-        
-        plt.bar(categorias_f1, f1_scores, color='gold')
-        plt.title('🎯 F1-Score por Categoría', fontweight='bold')
-        plt.ylabel('F1-Score')
-        plt.xticks(rotation=45)
-        
-        # Gráfico 6: Heatmap de probabilidades por clase
-        plt.subplot(3, 3, 6)
-        prob_media_por_clase = np.zeros((len(clases), len(clases)))
-        for i, clase_real in enumerate(clases):
-            indices = np.where(y_test == clase_real)[0]
-            if len(indices) > 0:
-                prob_media_por_clase[i] = np.mean(probabilidades[indices], axis=0)
-        
-        sns.heatmap(prob_media_por_clase, annot=True, fmt='.3f', cmap='Reds',
-                   xticklabels=clases, yticklabels=clases)
-        plt.title('🔥 Probabilidades Promedio\nReal vs Predicho', fontweight='bold')
-        plt.xlabel('Clase Predicha')
-        plt.ylabel('Clase Real')
-        
-        # Gráfico 7: Precisión vs Recall por modelo
-        plt.subplot(3, 3, 7)
-        precision_macro = []
-        recall_macro = []
-        for nombre in nombres:
-            y_pred_temp = resultados[nombre]['predicciones']
-            reporte_temp = classification_report(y_test, y_pred_temp, output_dict=True)
-            precision_macro.append(reporte_temp['macro avg']['precision'])
-            recall_macro.append(reporte_temp['macro avg']['recall'])
-        
-        plt.scatter(recall_macro, precision_macro, s=100, c=colores[:len(nombres)], alpha=0.7)
-        for i, nombre in enumerate(nombres):
-            plt.annotate(nombre, (recall_macro[i], precision_macro[i]), 
-                        xytext=(5, 5), textcoords='offset points')
-        plt.xlabel('Recall Macro')
-        plt.ylabel('Precisión Macro')
-        plt.title('📈 Precisión vs Recall', fontweight='bold')
-        
-        # Gráfico 8: Distribución de errores por categoría
-        plt.subplot(3, 3, 8)
-        errores_por_categoria = {}
-        for i, (real, pred) in enumerate(zip(y_test, y_pred_mejor)):
-            if real != pred:
-                if real not in errores_por_categoria:
-                    errores_por_categoria[real] = 0
-                errores_por_categoria[real] += 1
-        
-        if errores_por_categoria:
-            categorias_error = list(errores_por_categoria.keys())
-            conteo_errores = list(errores_por_categoria.values())
-            plt.bar(categorias_error, conteo_errores, color='lightcoral')
-            plt.title('❌ Errores por Categoría Real', fontweight='bold')
-            plt.ylabel('Número de Errores')
-            plt.xticks(rotation=45)
-        
-        # Gráfico 9: Evolución de confianza por tamaño de muestra
-        plt.subplot(3, 3, 9)
-        if len(max_probs) > 100:
-            ventana = len(max_probs) // 20
-            confianza_promedio = []
-            for i in range(0, len(max_probs), ventana):
-                fin = min(i + ventana, len(max_probs))
-                confianza_promedio.append(np.mean(max_probs[i:fin]))
-            
-            plt.plot(range(len(confianza_promedio)), confianza_promedio, 'b-', linewidth=2)
-            plt.title('📊 Confianza vs Muestras', fontweight='bold')
-            plt.xlabel('Segmento de Muestra')
-            plt.ylabel('Confianza Promedio')
-        
-        plt.tight_layout()
-        plt.savefig('/home/sedc/Proyectos/MineriaDeDatos/results/graficos/clasificacion_bayesiana.png', 
-                   dpi=150, bbox_inches='tight')
-        plt.show()
-        
-        print("💾 Gráficos guardados en: results/graficos/clasificacion_bayesiana.png")
-        
-    except Exception as e:
-        print(f"⚠️ Error creando visualizaciones: {e}")
+    return analisis
+
+def visualizar_resultados_bayesianos(resultados, y_test, prob_priori):
+    """Crea visualizaciones de clasificación bayesiana"""
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
     
-    # 13. GUARDAR RESULTADOS
-    try:
-        import joblib
-        
-        # Guardar el mejor modelo
-        joblib.dump(mejor_modelo, '/home/sedc/Proyectos/MineriaDeDatos/results/modelos/mejor_modelo_bayesiano.pkl')
-        
-        # Crear reporte detallado
-        reporte_completo = f"""
-REPORTE CLASIFICACIÓN BAYESIANA
-==============================
+    # 1. Comparación de accuracy
+    nombres = list(resultados.keys())
+    accuracies = [resultados[m]['accuracy'] for m in nombres]
+    
+    axes[0,0].bar(nombres, accuracies, color=['lightblue', 'lightgreen', 'orange'])
+    axes[0,0].set_title('Precisión por Modelo Bayesiano')
+    axes[0,0].set_ylabel('Accuracy')
+    axes[0,0].tick_params(axis='x', rotation=45)
+    for i, acc in enumerate(accuracies):
+        axes[0,0].text(i, acc + 0.01, f'{acc:.3f}', ha='center')
+    
+    # 2. Matriz de confusión (mejor modelo)
+    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
+    y_pred_mejor = resultados[mejor]['predicciones']
+    
+    cm = confusion_matrix(y_test, y_pred_mejor)
+    clases = resultados[mejor]['modelo'].classes_
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=clases, yticklabels=clases, ax=axes[0,1])
+    axes[0,1].set_title(f'Matriz de Confusión - {mejor}')
+    axes[0,1].set_xlabel('Predicción')
+    axes[0,1].set_ylabel('Real')
+    
+    # 3. Probabilidades a priori
+    clases_priori = list(prob_priori.keys())
+    probs_priori = list(prob_priori.values())
+    axes[0,2].pie(probs_priori, labels=clases_priori, autopct='%1.1f%%', startangle=90)
+    axes[0,2].set_title('Probabilidades A Priori')
+    
+    # 4. Distribución de confianza
+    probabilidades = resultados[mejor]['probabilidades']
+    max_probs = np.max(probabilidades, axis=1)
+    axes[1,0].hist(max_probs, bins=20, alpha=0.7, color='purple', edgecolor='black')
+    axes[1,0].set_title('Distribución de Confianza')
+    axes[1,0].set_xlabel('Confianza Máxima')
+    axes[1,0].set_ylabel('Frecuencia')
+    
+    # 5. F1-Score por clase
+    reporte = classification_report(y_test, y_pred_mejor, output_dict=True)
+    f1_scores = []
+    categorias_f1 = []
+    for categoria in clases:
+        if categoria in reporte:
+            f1_scores.append(reporte[categoria]['f1-score'])
+            categorias_f1.append(categoria)
+    
+    axes[1,1].bar(categorias_f1, f1_scores, color='gold')
+    axes[1,1].set_title('F1-Score por Categoría')
+    axes[1,1].set_ylabel('F1-Score')
+    axes[1,1].tick_params(axis='x', rotation=45)
+    
+    # 6. Comparación de características de modelos
+    descripciones = [resultados[m]['descripcion'] for m in nombres]
+    axes[1,2].text(0.1, 0.9, 'CARACTERÍSTICAS DE MODELOS:', fontsize=12, fontweight='bold')
+    
+    for i, (nombre, desc) in enumerate(zip(nombres, descripciones)):
+        axes[1,2].text(0.1, 0.7 - i*0.2, f'{nombre}:', fontsize=10, fontweight='bold')
+        axes[1,2].text(0.1, 0.65 - i*0.2, desc, fontsize=9)
+    
+    axes[1,2].set_xlim(0, 1)
+    axes[1,2].set_ylim(0, 1)
+    axes[1,2].axis('off')
+    
+    plt.tight_layout()
+    plt.savefig('results/graficos/clasificacion_bayesiana.png', dpi=150, bbox_inches='tight')
+    plt.show()
 
-MEJOR MODELO: {mejor_nombre} Naive Bayes
-Descripción: {resultados[mejor_nombre]['descripcion']}
-Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)
+def guardar_resultados_bayesianos(resultados, variables, total_registros, prob_priori, y_test):
+    """Guarda reporte de clasificación bayesiana"""
+    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
+    mejor_acc = resultados[mejor]['accuracy']
+    y_pred_mejor = resultados[mejor]['predicciones']
+    
+    # Análisis de probabilidades
+    analisis_prob = analizar_probabilidades(resultados, y_test)
+    
+    reporte = f"""CLASIFICACIÓN BAYESIANA - REPORTE
+================================
 
-COMPARACIÓN DE MODELOS:
+MEJOR MODELO: {mejor} Naive Bayes
+Descripción: {resultados[mejor]['descripcion']}
+Precisión (Accuracy): {mejor_acc:.3f} ({mejor_acc*100:.1f}%)
+
+COMPARACIÓN MODELOS:
 """
-        for nombre, resultado in resultados.items():
-            reporte_completo += f"\n{nombre} NB:"
-            reporte_completo += f"\n  - Precisión: {resultado['precision']:.3f}"
-            reporte_completo += f"\n  - Descripción: {resultado['descripcion']}"
-        
-        reporte_completo += f"""
+    for nombre, res in resultados.items():
+        reporte += f"\n{nombre} NB:"
+        reporte += f"\n  - Precisión: {res['accuracy']:.3f}"
+        reporte += f"\n  - Descripción: {res['descripcion']}"
+    
+    reporte += f"\n\nPROBABILIDADES A PRIORI:\n"
+    for clase, prob in prob_priori.items():
+        reporte += f"P({clase}) = {prob:.3f} ({prob*100:.1f}%)\n"
+    
+    # Métricas detalladas por clase
+    reporte_sklearn = classification_report(y_test, y_pred_mejor, output_dict=True)
+    reporte += f"\nMÉTRICAS POR CLASE ({mejor}):\n"
+    for clase in ['Pequeña', 'Mediana', 'Grande', 'Muy_Grande']:
+        if clase in reporte_sklearn:
+            prec = reporte_sklearn[clase]['precision']
+            rec = reporte_sklearn[clase]['recall']
+            f1 = reporte_sklearn[clase]['f1-score']
+            support = reporte_sklearn[clase]['support']
+            reporte += f"{clase}: Precision={prec:.3f}, Recall={rec:.3f}, F1={f1:.3f}, N={support}\n"
+    
+    # Análisis de confianza
+    reporte += f"\nANÁLISIS DE CONFIANZA:\n"
+    for clase, info in analisis_prob.items():
+        reporte += f"{clase}: Confianza promedio = {info['confianza_promedio']:.3f}, Predicciones = {info['predicciones_clase']}\n"
+    
+    reporte += f"""
+DATOS UTILIZADOS:
+- Total registros: {total_registros:,}
+- Variables: {', '.join(variables)}
+- División: 70% entrenamiento, 30% prueba
 
-PROBABILIDADES A PRIORI:
+PRINCIPIO BAYESIANO:
+- Usa el Teorema de Bayes: P(Clase|Datos) = P(Datos|Clase) × P(Clase) / P(Datos)
+- Asume independencia entre variables (naive)
+- Calcula probabilidades en lugar de dar respuestas definitivas
+
+TIPOS DE NAIVE BAYES:
+- Gaussiano: Para variables continuas con distribución normal
+- Multinomial: Para conteos y frecuencias (ej: palabras en texto)
+- Bernoulli: Para características binarias (presencia/ausencia)
+
+VENTAJAS:
+- Rápido y eficiente
+- Funciona bien con pocos datos
+- Proporciona probabilidades de clasificación
+- Robusto al ruido
+
+APLICACIONES:
+- Filtros de spam
+- Análisis de sentimientos
+- Diagnóstico médico
+- Clasificación de documentos
 """
-        for clase, prob in prob_priori.items():
-            reporte_completo += f"\nP({clase}) = {prob:.3f}"
-        
-        reporte_completo += f"""
+    
+    with open('results/reportes/clasificacion_bayesiana_reporte.txt', 'w', encoding='utf-8') as f:
+        f.write(reporte)
 
-VARIABLES UTILIZADAS:
-{', '.join(variables_disponibles)}
-
-DATOS:
-- Total registros: {len(datos_limpios):,}
-- Variables predictoras: {len(variables_disponibles)}
-- Categorías: {len(clases)}
-"""
-        
-        with open('/home/sedc/Proyectos/MineriaDeDatos/results/reportes/clasificacion_bayesiana_reporte.txt', 'w', encoding='utf-8') as f:
-            f.write(reporte_completo)
-        
-        print("💾 Modelo guardado en: results/modelos/mejor_modelo_bayesiano.pkl")
-        print("📄 Reporte guardado en: results/reportes/clasificacion_bayesiana_reporte.txt")
-        
-    except Exception as e:
-        print(f"⚠️ Error guardando archivos: {e}")
+def ejecutar_clasificacion_bayesiana():
+    """Función principal"""
+    print("🎲 CLASIFICACIÓN BAYESIANA")
+    print("="*35)
     
-    # 14. RESUMEN FINAL
-    print()
-    print("📝 RESUMEN CLASIFICACIÓN BAYESIANA:")
-    print(f"   • Mejor modelo: {mejor_nombre} Naive Bayes")
-    print(f"   • Precisión: {mejor_precision*100:.1f}%")
-    print(f"   • Principio: {resultados[mejor_nombre]['descripcion']}")
+    # Cargar y preparar datos
+    datos = cargar_datos()
+    X, y, variables = preparar_datos(datos)
     
-    if mejor_precision > 0.8:
-        print("   • ¡Excelente clasificación probabilística! 🎉")
-    elif mejor_precision > 0.6:
-        print("   • Buena clasificación bayesiana 👍")
-    else:
-        print("   • Clasificación moderada, revisar distribuciones 🔧")
+    print(f"📊 Datos: {len(X):,} registros")
+    print(f"📊 Variables: {', '.join(variables)}")
     
-    print("✅ CLASIFICACIÓN BAYESIANA COMPLETADA")
-    return resultados
+    # Calcular probabilidades a priori
+    prob_priori = calcular_probabilidades_priori(y)
+    print(f"\n🎯 Probabilidades A Priori:")
+    for clase, prob in prob_priori.items():
+        print(f"   P({clase}) = {prob:.3f} ({prob*100:.1f}%)")
+    
+    # División train/test
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.3, random_state=42, stratify=y
+    )
+    
+    # Entrenar modelos bayesianos
+    print("\n🧠 Entrenando modelos bayesianos...")
+    resultados = entrenar_modelos_bayesianos(X_train, X_test, y_train, y_test)
+    
+    if not resultados:
+        print("❌ No se pudieron entrenar modelos bayesianos")
+        return
+    
+    # Mostrar resultados
+    print("\nRESULTADOS:")
+    for nombre, res in resultados.items():
+        print(f"{nombre:12}: Accuracy = {res['accuracy']:.3f} ({res['accuracy']*100:.1f}%)")
+    
+    # Mejor modelo
+    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
+    print(f"\n🏆 MEJOR: {mejor} (Accuracy = {resultados[mejor]['accuracy']:.3f})")
+    print(f"    Descripción: {resultados[mejor]['descripcion']}")
+    
+    # Análisis de probabilidades
+    print(f"\n📊 Análisis de confianza:")
+    analisis_prob = analizar_probabilidades(resultados, y_test)
+    for clase, info in analisis_prob.items():
+        print(f"   {clase}: Confianza = {info['confianza_promedio']:.3f}")
+    
+    # Visualizar resultados
+    visualizar_resultados_bayesianos(resultados, y_test, prob_priori)
+    
+    # Guardar resultados
+    guardar_resultados_bayesianos(resultados, variables, len(X), prob_priori, y_test)
+    
+    print("✅ COMPLETADO")
+    
+    return {
+        'mejor_modelo': mejor,
+        'precision': resultados[mejor]['accuracy'],
+        'resultados': resultados
+    }
 
 if __name__ == "__main__":
     ejecutar_clasificacion_bayesiana()

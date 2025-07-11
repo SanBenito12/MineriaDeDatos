@@ -1,0 +1,38 @@
+ÁRBOLES DE PREDICCIÓN - REPORTE
+==============================
+
+MEJOR MODELO: Extra Trees
+Precisión (R²): 0.903 (90.3%)
+
+COMPARACIÓN MODELOS:
+
+Decision Tree:
+  - R²: 0.882
+  - MSE: 488
+  - MAE: 1
+Random Forest:
+  - R²: 0.893
+  - MSE: 445
+  - MAE: 1
+Extra Trees:
+  - R²: 0.903
+  - MSE: 402
+  - MAE: 1
+
+IMPORTANCIA VARIABLES (Extra Trees):
+- POBFEM: 0.244
+- POBMAS: 0.187
+- TOTHOG: 0.185
+- VIVTOT: 0.126
+- P_15YMAS: 0.215
+- P_60YMAS: 0.044
+
+DATOS UTILIZADOS:
+- Total registros: 69,084
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS
+- División: 70% entrenamiento, 30% prueba
+
+CARACTERÍSTICAS ÁRBOLES:
+- Pueden capturar relaciones no lineales
+- Proporcionan importancia de variables
+- Son interpretables (especialmente árboles simples)

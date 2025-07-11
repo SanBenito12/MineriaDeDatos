@@ -1,0 +1,43 @@
+ESTIMADORES DE NÚCLEOS - REPORTE
+===============================
+
+MEJOR MODELO: K-NN
+Precisión (R²): 0.862 (86.2%)
+
+COMPARACIÓN MODELOS:
+
+SVR-RBF:
+  - R²: 0.670
+  - MSE: 1745
+  - MAE: 3
+SVR-Poly:
+  - R²: -33.609
+  - MSE: 182751
+  - MAE: 49
+K-NN:
+  - R²: 0.862
+  - MSE: 727
+  - MAE: 3
+Kernel Ridge:
+  - R²: 0.469
+  - MSE: 2805
+  - MAE: 4
+SVR-Optimizado:
+  - R²: 0.698
+  - MSE: 1592
+  - MAE: 2
+
+SVR OPTIMIZADO:
+  - R²: 0.698
+  - Parámetros: {'C': 1000, 'epsilon': 0.2, 'gamma': 'auto'}
+
+DATOS UTILIZADOS:
+- Total registros: 3,000
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS
+- División: 70% entrenamiento, 30% prueba
+
+CARACTERÍSTICAS ESTIMADORES:
+- SVR: Encuentra patrones no lineales complejos
+- K-NN: Predice basándose en vecinos similares
+- Kernel Ridge: Combina regularización con kernels
+- Todos los datos fueron escalados (StandardScaler)

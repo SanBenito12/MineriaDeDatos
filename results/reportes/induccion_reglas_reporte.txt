@@ -1,0 +1,43 @@
+INDUCCIÓN DE REGLAS - REPORTE
+===========================
+
+MEJOR CONJUNTO: Reglas Detalladas
+Precisión: 1.000 (100.0%)
+Total reglas: 5
+Reglas confiables: 0
+
+COMPARACIÓN CONJUNTOS:
+
+Reglas Simples:
+  - Precisión: 0.999
+  - Total reglas: 5
+  - Reglas confiables: 0
+Reglas Detalladas:
+  - Precisión: 1.000
+  - Total reglas: 5
+  - Reglas confiables: 0
+Reglas Precisas:
+  - Precisión: 1.000
+  - Total reglas: 6
+  - Reglas confiables: 0
+
+TOP 10 REGLAS MÁS CONFIABLES:
+==================================================
+
+
+DATOS UTILIZADOS:
+- Total registros: 69,084
+- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, GRAPROES, PEA, POCUPADA
+- División: 70% entrenamiento, 30% prueba
+
+INTERPRETACIÓN DE REGLAS:
+- Cada regla es una secuencia IF-THEN
+- La confianza indica qué tan segura es la regla
+- Se pueden usar para tomar decisiones automáticas
+- Son completamente interpretables y explicables
+
+APLICACIONES PRÁCTICAS:
+- Clasificar automáticamente nuevas comunidades
+- Guías para políticas públicas específicas
+- Sistemas de apoyo a la decisión
+- Auditoría de criterios de clasificación

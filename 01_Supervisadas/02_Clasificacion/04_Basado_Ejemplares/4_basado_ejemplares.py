@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CLASIFICACIÓN BASADA EN EJEMPLARES (K-NN)
-Clasifica basándose en los vecinos más cercanos
+CLASIFICACIÓN BASADA EN EJEMPLARES - K-NN
 """
 
 import pandas as pd
@@ -13,25 +12,49 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.spatial.distance import cdist
-import warnings
-warnings.filterwarnings('ignore')
+
+def cargar_datos():
+    """Carga el dataset principal"""
+    return pd.read_csv('data/ceros_sin_columnasAB_limpio_weka.csv')
 
 def crear_categorias_poblacion(poblacion):
-    """Crear categorías de población para clasificación"""
-    if poblacion <= 1000:
+    """Crea categorías de población para clasificación"""
+    if poblacion <= 500:
         return 'Pequeña'
-    elif poblacion <= 5000:
+    elif poblacion <= 2000:
         return 'Mediana'
-    elif poblacion <= 20000:
+    elif poblacion <= 8000:
         return 'Grande'
     else:
-        return 'Muy Grande'
+        return 'Muy_Grande'
+
+def preparar_datos(datos, max_muestras=5000):
+    """Prepara variables para K-NN (reduciendo muestra para eficiencia)"""
+    variables = ['POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT', 'P_15YMAS', 'P_60YMAS', 'GRAPROES', 'PEA', 'POCUPADA', 'PDESOCUP']
+    variables_disponibles = [v for v in variables if v in datos.columns]
+    
+    # Crear variable objetivo categórica
+    datos['CATEGORIA_POB'] = datos['POBTOT'].apply(crear_categorias_poblacion)
+    
+    # Dataset limpio
+    df = datos[variables_disponibles + ['CATEGORIA_POB']].dropna()
+    
+    # Reducir muestra para eficiencia (K-NN es costoso)
+    if len(df) > max_muestras:
+        df = df.sample(n=max_muestras, random_state=42)
+        print(f"📝 Muestra reducida a {len(df):,} registros (para eficiencia K-NN)")
+    
+    X = df[variables_disponibles]
+    y = df['CATEGORIA_POB']
+    
+    return X, y, variables_disponibles
 
 def encontrar_k_optimo(X_train, y_train, k_max=20):
     """Encuentra el mejor valor de K usando validación cruzada"""
     k_values = range(1, min(k_max + 1, len(X_train) // 5))
     cv_scores = []
+    
+    print("    Probando diferentes valores de K...")
     
     for k in k_values:
         knn = KNeighborsClassifier(n_neighbors=k, weights='distance')
@@ -43,101 +66,14 @@ def encontrar_k_optimo(X_train, y_train, k_max=20):
     
     return mejor_k, mejor_score, list(k_values), cv_scores
 
-def analizar_distancias(X_train, X_test, n_muestras=100):
-    """Analiza la distribución de distancias entre puntos"""
-    # Tomar muestra para análisis (computacionalmente costoso)
-    if len(X_train) > n_muestras:
-        indices = np.random.choice(len(X_train), n_muestras, replace=False)
-        X_muestra = X_train[indices]
-    else:
-        X_muestra = X_train
+def entrenar_modelos_knn(X_train, X_test, y_train, y_test, mejor_k):
+    """Entrena diferentes configuraciones de K-NN"""
     
-    # Calcular distancias
-    distancias = cdist(X_muestra, X_muestra, metric='euclidean')
-    
-    # Estadísticas de distancias
-    distancias_no_cero = distancias[distancias > 0]
-    
-    stats = {
-        'promedio': np.mean(distancias_no_cero),
-        'mediana': np.median(distancias_no_cero),
-        'std': np.std(distancias_no_cero),
-        'min': np.min(distancias_no_cero),
-        'max': np.max(distancias_no_cero)
-    }
-    
-    return stats, distancias_no_cero
-
-def ejecutar_clasificacion_ejemplares():
-    print("👥 CLASIFICACIÓN BASADA EN EJEMPLARES (K-NN)")
-    print("="*45)
-    print("📝 Objetivo: Clasificar basándose en vecinos más cercanos")
-    print()
-    
-    # 1. CARGAR DATOS
-    archivo = '/home/sedc/Proyectos/MineriaDeDatos/data/ceros_sin_columnasAB_limpio_weka.csv'
-    try:
-        datos = pd.read_csv(archivo)
-        print(f"✅ Datos cargados: {datos.shape[0]:,} filas, {datos.shape[1]} columnas")
-    except Exception as e:
-        print(f"❌ Error cargando datos: {e}")
-        return
-    
-    # 2. SELECCIONAR VARIABLES PREDICTORAS
-    variables_predictoras = [
-        'POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT', 'P_15YMAS', 
-        'P_60YMAS', 'GRAPROES', 'PEA', 'POCUPADA', 'PDESOCUP'
-    ]
-    
-    variables_disponibles = [v for v in variables_predictoras if v in datos.columns]
-    
-    if len(variables_disponibles) < 3:
-        print("❌ No hay suficientes variables para clasificación")
-        return
-    
-    print(f"📊 Variables usadas: {', '.join(variables_disponibles)}")
-    
-    # 3. CREAR VARIABLE OBJETIVO
-    datos['CATEGORIA_POB'] = datos['POBTOT'].apply(crear_categorias_poblacion)
-    
-    # 4. PREPARAR DATOS
-    datos_limpios = datos[variables_disponibles + ['CATEGORIA_POB']].dropna()
-    
-    # Reducir muestra si es muy grande (K-NN es costoso)
-    if len(datos_limpios) > 5000:
-        datos_limpios = datos_limpios.sample(n=5000, random_state=42)
-        print(f"📝 Muestra reducida a {len(datos_limpios):,} registros (para eficiencia)")
-    
-    X = datos_limpios[variables_disponibles]
-    y = datos_limpios['CATEGORIA_POB']
-    
-    print(f"🧹 Datos finales: {len(datos_limpios):,} registros")
-    print(f"📈 Distribución de categorías:")
-    for categoria, count in y.value_counts().items():
-        print(f"   {categoria:12}: {count:,} ({count/len(y)*100:.1f}%)")
-    
-    # 5. DIVIDIR DATOS
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=42, stratify=y
-    )
-    
-    # 6. ESCALAR DATOS (MUY IMPORTANTE PARA K-NN)
+    # Escalar datos (CRÍTICO para K-NN)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    print(f"📊 Entrenamiento: {len(X_train):,} | Prueba: {len(X_test):,}")
-    print()
-    
-    # 7. ENCONTRAR EL MEJOR VALOR DE K
-    print("🔍 BUSCANDO EL MEJOR VALOR DE K...")
-    mejor_k, mejor_cv_score, k_values, cv_scores = encontrar_k_optimo(X_train_scaled, y_train)
-    
-    print(f"   ✅ Mejor K: {mejor_k}")
-    print(f"   📊 Score CV: {mejor_cv_score:.3f} ({mejor_cv_score*100:.1f}%)")
-    print()
-    
-    # 8. ENTRENAR DIFERENTES CONFIGURACIONES DE K-NN
     configuraciones = {
         f'K-NN Óptimo (K={mejor_k})': {
             'n_neighbors': mejor_k,
@@ -150,19 +86,12 @@ def ejecutar_clasificacion_ejemplares():
         'K-NN Ponderado (K=7)': {
             'n_neighbors': 7,
             'weights': 'distance'
-        },
-        'K-NN Conservative (K=15)': {
-            'n_neighbors': min(15, len(X_train) // 10),
-            'weights': 'distance'
         }
     }
     
-    print("👥 ENTRENANDO MODELOS K-NN...")
     resultados = {}
     
     for nombre, params in configuraciones.items():
-        print(f"   🔄 Entrenando {nombre}...")
-        
         try:
             # Crear y entrenar modelo
             modelo = KNeighborsClassifier(**params, metric='euclidean')
@@ -173,340 +102,254 @@ def ejecutar_clasificacion_ejemplares():
             y_pred_proba = modelo.predict_proba(X_test_scaled)
             
             # Métricas
-            precision = accuracy_score(y_test, y_pred)
-            
             resultados[nombre] = {
                 'modelo': modelo,
-                'precision': precision,
+                'accuracy': accuracy_score(y_test, y_pred),
                 'predicciones': y_pred,
                 'probabilidades': y_pred_proba,
                 'k': params['n_neighbors'],
                 'weights': params['weights']
             }
             
-            print(f"   ✅ {nombre} → Precisión: {precision:.3f} ({precision*100:.1f}%)")
-            
         except Exception as e:
-            print(f"   ❌ Error en {nombre}: {e}")
+            print(f"    ❌ Error en {nombre}: {str(e)[:50]}...")
+            continue
     
-    if not resultados:
-        print("❌ No se pudo entrenar ningún modelo K-NN")
-        return
+    return resultados, scaler
+
+def analizar_vecinos(modelo, X_test_scaled, y_test, y_pred, n_ejemplos=3):
+    """Analiza los vecinos más cercanos para algunos ejemplos"""
+    print(f"\n👥 Análisis de vecinos más cercanos:")
     
-    # 9. ENCONTRAR EL MEJOR MODELO
-    mejor_nombre = max(resultados.keys(), key=lambda x: resultados[x]['precision'])
-    mejor_modelo = resultados[mejor_nombre]['modelo']
-    mejor_precision = resultados[mejor_nombre]['precision']
-    
-    print()
-    print(f"🏆 MEJOR MODELO: {mejor_nombre}")
-    print(f"   Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)")
-    print(f"   K utilizado: {resultados[mejor_nombre]['k']}")
-    print(f"   Ponderación: {resultados[mejor_nombre]['weights']}")
-    
-    # 10. ANÁLISIS DETALLADO
-    print()
-    print("📊 ANÁLISIS DETALLADO:")
-    y_pred_mejor = resultados[mejor_nombre]['predicciones']
-    
-    # Reporte por clase
-    print("\n🎯 Métricas por Categoría:")
-    reporte = classification_report(y_test, y_pred_mejor, output_dict=True)
-    for categoria in ['Pequeña', 'Mediana', 'Grande', 'Muy Grande']:
-        if categoria in reporte:
-            precision = reporte[categoria]['precision']
-            recall = reporte[categoria]['recall']
-            f1 = reporte[categoria]['f1-score']
-            support = reporte[categoria]['support']
-            print(f"   {categoria:12}: Prec={precision:.3f} | Rec={recall:.3f} | F1={f1:.3f} | N={support}")
-    
-    # 11. ANÁLISIS DE DISTANCIAS
-    print()
-    print("📏 ANÁLISIS DE DISTANCIAS:")
     try:
-        stats_dist, distancias = analizar_distancias(X_train_scaled, X_test_scaled)
-        print(f"   📊 Distancia promedio: {stats_dist['promedio']:.3f}")
-        print(f"   📊 Distancia mediana: {stats_dist['mediana']:.3f}")
-        print(f"   📊 Desviación estándar: {stats_dist['std']:.3f}")
-        print(f"   📊 Rango: [{stats_dist['min']:.3f}, {stats_dist['max']:.3f}]")
-    except Exception as e:
-        print(f"   ⚠️ Error calculando distancias: {e}")
-        distancias = None
-    
-    # 12. ANÁLISIS DE VECINOS
-    print()
-    print("👥 ANÁLISIS DE VECINOS:")
-    try:
-        # Obtener distancias y índices de vecinos para algunas muestras
-        if len(X_test_scaled) > 0:
-            distancias_vecinos, indices_vecinos = mejor_modelo.kneighbors(X_test_scaled[:5])
+        # Obtener distancias y índices de vecinos para las primeras muestras
+        distancias, indices = modelo.kneighbors(X_test_scaled[:n_ejemplos])
+        
+        for i in range(n_ejemplos):
+            print(f"\n   Ejemplo {i+1}:")
+            print(f"   Clase real: {y_test.iloc[i]}")
+            print(f"   Clase predicha: {y_pred[i]}")
+            print(f"   Distancias a vecinos: {distancias[i]}")
             
-            for i in range(min(3, len(distancias_vecinos))):
-                print(f"\n   Muestra {i+1}:")
-                print(f"   Clase real: {y_test.iloc[i]}")
-                print(f"   Clase predicha: {y_pred_mejor[i]}")
-                print(f"   Distancias a vecinos: {distancias_vecinos[i]}")
-                
-                # Clases de los vecinos
-                clases_vecinos = y_train.iloc[indices_vecinos[i]].values
-                print(f"   Clases de vecinos: {list(clases_vecinos)}")
-    
     except Exception as e:
         print(f"   ⚠️ Error analizando vecinos: {e}")
-    
-    # 13. VISUALIZACIONES
-    try:
-        fig = plt.figure(figsize=(18, 12))
-        
-        # Gráfico 1: Evolución de precisión con K
-        plt.subplot(3, 4, 1)
-        plt.plot(k_values, cv_scores, 'b-o', linewidth=2, markersize=6)
-        plt.axvline(x=mejor_k, color='red', linestyle='--', label=f'Mejor K={mejor_k}')
-        plt.title('🔍 Precisión vs Valor de K', fontweight='bold')
-        plt.xlabel('K (Número de Vecinos)')
-        plt.ylabel('Precisión (CV)')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        
-        # Gráfico 2: Comparación de modelos
-        plt.subplot(3, 4, 2)
-        nombres = list(resultados.keys())
-        precisiones = [resultados[m]['precision'] for m in nombres]
-        colores = ['lightblue', 'lightgreen', 'orange', 'pink']
-        
-        barras = plt.bar(range(len(nombres)), precisiones, color=colores[:len(nombres)])
-        plt.title('👥 Precisión por Configuración', fontweight='bold')
-        plt.ylabel('Precisión')
-        plt.xticks(range(len(nombres)), [n.split('(')[0] for n in nombres], rotation=45, ha='right')
-        plt.ylim(0, 1)
-        
-        for i, (barra, precision) in enumerate(zip(barras, precisiones)):
-            plt.text(i, precision + 0.02, f'{precision:.3f}', ha='center', fontweight='bold')
-        
-        # Gráfico 3: Matriz de confusión
-        plt.subplot(3, 4, 3)
-        cm = confusion_matrix(y_test, y_pred_mejor)
-        clases = mejor_modelo.classes_
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                   xticklabels=clases, yticklabels=clases)
-        plt.title(f'🎯 Matriz de Confusión\n{mejor_nombre.split("(")[0]}', fontweight='bold')
-        plt.xlabel('Predicción')
-        plt.ylabel('Real')
-        
-        # Gráfico 4: Distribución de distancias (si disponible)
-        plt.subplot(3, 4, 4)
-        if distancias is not None and len(distancias) > 0:
-            plt.hist(distancias, bins=30, alpha=0.7, color='purple', edgecolor='black')
-            plt.title('📏 Distribución de Distancias', fontweight='bold')
-            plt.xlabel('Distancia Euclidiana')
-            plt.ylabel('Frecuencia')
-        else:
-            plt.text(0.5, 0.5, 'Análisis de distancias\nno disponible', 
-                    ha='center', va='center', transform=plt.gca().transAxes)
-            plt.title('📏 Distribución de Distancias', fontweight='bold')
-        
-        # Gráfico 5: F1-Score por categoría
-        plt.subplot(3, 4, 5)
-        f1_scores = []
-        categorias_f1 = []
-        for categoria in ['Pequeña', 'Mediana', 'Grande', 'Muy Grande']:
-            if categoria in reporte:
-                f1_scores.append(reporte[categoria]['f1-score'])
-                categorias_f1.append(categoria)
-        
-        plt.bar(categorias_f1, f1_scores, color='gold')
-        plt.title('🎯 F1-Score por Categoría', fontweight='bold')
-        plt.ylabel('F1-Score')
-        plt.xticks(rotation=45)
-        
-        # Gráfico 6: Comparación de K values utilizados
-        plt.subplot(3, 4, 6)
-        k_vals = [resultados[m]['k'] for m in nombres]
-        weights = [resultados[m]['weights'] for m in nombres]
-        
-        colores_k = ['blue' if w == 'uniform' else 'red' for w in weights]
-        plt.scatter(k_vals, precisiones, c=colores_k, s=100, alpha=0.7)
-        for i, nombre in enumerate(nombres):
-            plt.annotate(nombre.split('(')[0][:8], (k_vals[i], precisiones[i]), 
-                        xytext=(5, 5), textcoords='offset points', fontsize=8)
-        plt.xlabel('Valor de K')
-        plt.ylabel('Precisión')
-        plt.title('📊 K vs Precisión\n🔵Uniform 🔴Distance', fontweight='bold')
-        
-        # Gráfico 7: Distribución de confianza
-        plt.subplot(3, 4, 7)
-        probabilidades = resultados[mejor_nombre]['probabilidades']
-        max_probs = np.max(probabilidades, axis=1)
-        plt.hist(max_probs, bins=20, alpha=0.7, color='green', edgecolor='black')
-        plt.title('📈 Confianza de Predicciones', fontweight='bold')
-        plt.xlabel('Confianza Máxima')
-        plt.ylabel('Frecuencia')
-        
-        # Gráfico 8: Precisión por tamaño de K
-        plt.subplot(3, 4, 8)
-        k_sizes = ['Pequeño (1-5)', 'Mediano (6-10)', 'Grande (11-20)']
-        precisions_by_size = [[], [], []]
-        
-        for i, k in enumerate(k_values):
-            if k <= 5:
-                precisions_by_size[0].append(cv_scores[i])
-            elif k <= 10:
-                precisions_by_size[1].append(cv_scores[i])
-            else:
-                precisions_by_size[2].append(cv_scores[i])
-        
-        avg_precisions = [np.mean(p) if p else 0 for p in precisions_by_size]
-        plt.bar(k_sizes, avg_precisions, color=['lightcoral', 'lightblue', 'lightgreen'])
-        plt.title('📊 Precisión por Tamaño K', fontweight='bold')
-        plt.ylabel('Precisión Promedio')
-        plt.xticks(rotation=45)
-        
-        # Gráfico 9: Errores por categoría
-        plt.subplot(3, 4, 9)
-        errores_por_categoria = {}
-        for real, pred in zip(y_test, y_pred_mejor):
-            if real != pred:
-                errores_por_categoria[real] = errores_por_categoria.get(real, 0) + 1
-        
-        if errores_por_categoria:
-            categorias_error = list(errores_por_categoria.keys())
-            conteo_errores = list(errores_por_categoria.values())
-            plt.bar(categorias_error, conteo_errores, color='red', alpha=0.7)
-            plt.title('❌ Errores por Categoría', fontweight='bold')
-            plt.ylabel('Número de Errores')
-            plt.xticks(rotation=45)
-        
-        # Gráfico 10: Support por categoría
-        plt.subplot(3, 4, 10)
-        supports = []
-        for categoria in categorias_f1:
-            supports.append(reporte[categoria]['support'])
-        
-        plt.bar(categorias_f1, supports, color='cyan')
-        plt.title('📊 Muestras por Categoría', fontweight='bold')
-        plt.ylabel('Número de Muestras')
-        plt.xticks(rotation=45)
-        
-        # Gráfico 11: Evolución de precisión (curva suavizada)
-        plt.subplot(3, 4, 11)
-        if len(cv_scores) > 5:
-            from scipy.ndimage import gaussian_filter1d
-            cv_scores_smooth = gaussian_filter1d(cv_scores, sigma=0.8)
-            plt.plot(k_values, cv_scores, 'o-', alpha=0.5, label='Original')
-            plt.plot(k_values, cv_scores_smooth, 'r-', linewidth=2, label='Suavizada')
-            plt.axvline(x=mejor_k, color='green', linestyle='--', label=f'Óptimo K={mejor_k}')
-            plt.title('📈 Curva de Aprendizaje K-NN', fontweight='bold')
-            plt.xlabel('K')
-            plt.ylabel('Precisión CV')
-            plt.legend()
-        
-        # Gráfico 12: Heatmap de confusión normalizada
-        plt.subplot(3, 4, 12)
-        cm_norm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        sns.heatmap(cm_norm, annot=True, fmt='.2f', cmap='Reds',
-                   xticklabels=clases, yticklabels=clases)
-        plt.title('🔥 Confusión Normalizada', fontweight='bold')
-        plt.xlabel('Predicción')
-        plt.ylabel('Real')
-        
-        plt.tight_layout()
-        plt.savefig('/home/sedc/Proyectos/MineriaDeDatos/results/graficos/clasificacion_knn.png', 
-                   dpi=150, bbox_inches='tight')
-        plt.show()
-        
-        print("💾 Gráficos guardados en: results/graficos/clasificacion_knn.png")
-        
-    except Exception as e:
-        print(f"⚠️ Error creando visualizaciones: {e}")
-    
-    # 14. GUARDAR RESULTADOS
-    try:
-        import joblib
-        
-        # Guardar el mejor modelo y el scaler
-        joblib.dump(mejor_modelo, '/home/sedc/Proyectos/MineriaDeDatos/results/modelos/mejor_knn_clasificacion.pkl')
-        joblib.dump(scaler, '/home/sedc/Proyectos/MineriaDeDatos/results/modelos/scaler_knn.pkl')
-        
-        # Crear reporte detallado
-        reporte_completo = f"""
-REPORTE CLASIFICACIÓN K-NN (BASADA EN EJEMPLARES)
-===============================================
 
-MEJOR MODELO: {mejor_nombre}
-Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)
-K Óptimo: {mejor_k}
-Valor K usado: {resultados[mejor_nombre]['k']}
-Ponderación: {resultados[mejor_nombre]['weights']}
+def visualizar_resultados_knn(resultados, y_test, k_values, cv_scores, mejor_k):
+    """Crea visualizaciones de K-NN"""
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    
+    # 1. Evolución de precisión con K
+    axes[0,0].plot(k_values, cv_scores, 'b-o', linewidth=2, markersize=6)
+    axes[0,0].axvline(x=mejor_k, color='red', linestyle='--', label=f'Mejor K={mejor_k}')
+    axes[0,0].set_title('Precisión vs Valor de K')
+    axes[0,0].set_xlabel('K (Número de Vecinos)')
+    axes[0,0].set_ylabel('Precisión (CV)')
+    axes[0,0].legend()
+    axes[0,0].grid(True, alpha=0.3)
+    
+    # 2. Comparación de modelos
+    nombres = list(resultados.keys())
+    accuracies = [resultados[m]['accuracy'] for m in nombres]
+    colores = ['lightblue', 'lightgreen', 'orange']
+    
+    axes[0,1].bar(range(len(nombres)), accuracies, color=colores[:len(nombres)])
+    axes[0,1].set_title('Precisión por Configuración K-NN')
+    axes[0,1].set_ylabel('Accuracy')
+    axes[0,1].set_xticks(range(len(nombres)))
+    axes[0,1].set_xticklabels([n.split('(')[0] for n in nombres], rotation=45)
+    for i, acc in enumerate(accuracies):
+        axes[0,1].text(i, acc + 0.01, f'{acc:.3f}', ha='center')
+    
+    # 3. Matriz de confusión (mejor modelo)
+    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
+    y_pred_mejor = resultados[mejor]['predicciones']
+    
+    cm = confusion_matrix(y_test, y_pred_mejor)
+    clases = resultados[mejor]['modelo'].classes_
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=clases, yticklabels=clases, ax=axes[0,2])
+    axes[0,2].set_title(f'Matriz de Confusión\n{mejor.split("(")[0]}')
+    axes[0,2].set_xlabel('Predicción')
+    axes[0,2].set_ylabel('Real')
+    
+    # 4. Distribución de confianza
+    probabilidades = resultados[mejor]['probabilidades']
+    max_probs = np.max(probabilidades, axis=1)
+    axes[1,0].hist(max_probs, bins=20, alpha=0.7, color='green', edgecolor='black')
+    axes[1,0].set_title('Distribución de Confianza')
+    axes[1,0].set_xlabel('Confianza Máxima')
+    axes[1,0].set_ylabel('Frecuencia')
+    
+    # 5. Comparación K vs Precisión
+    k_vals = [resultados[m]['k'] for m in nombres]
+    accuracies_k = [resultados[m]['accuracy'] for m in nombres]
+    weights = [resultados[m]['weights'] for m in nombres]
+    
+    colores_k = ['blue' if w == 'uniform' else 'red' for w in weights]
+    axes[1,1].scatter(k_vals, accuracies_k, c=colores_k, s=100, alpha=0.7)
+    for i, nombre in enumerate(nombres):
+        axes[1,1].annotate(nombre.split('(')[0][:8], (k_vals[i], accuracies_k[i]), 
+                          xytext=(5, 5), textcoords='offset points', fontsize=8)
+    axes[1,1].set_xlabel('Valor de K')
+    axes[1,1].set_ylabel('Precisión')
+    axes[1,1].set_title('K vs Precisión\n🔵Uniform 🔴Distance')
+    
+    # 6. F1-Score por categoría
+    reporte = classification_report(y_test, y_pred_mejor, output_dict=True)
+    f1_scores = []
+    categorias_f1 = []
+    for categoria in clases:
+        if categoria in reporte:
+            f1_scores.append(reporte[categoria]['f1-score'])
+            categorias_f1.append(categoria)
+    
+    axes[1,2].bar(categorias_f1, f1_scores, color='gold')
+    axes[1,2].set_title('F1-Score por Categoría')
+    axes[1,2].set_ylabel('F1-Score')
+    axes[1,2].tick_params(axis='x', rotation=45)
+    
+    plt.tight_layout()
+    plt.savefig('results/graficos/clasificacion_knn.png', dpi=150, bbox_inches='tight')
+    plt.show()
+
+def guardar_resultados_knn(resultados, variables, total_registros, mejor_k, cv_scores, y_test):
+    """Guarda reporte de K-NN"""
+    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
+    mejor_acc = resultados[mejor]['accuracy']
+    y_pred_mejor = resultados[mejor]['predicciones']
+    
+    reporte = f"""CLASIFICACIÓN BASADA EN EJEMPLARES (K-NN) - REPORTE
+==================================================
+
+MEJOR MODELO: {mejor}
+Precisión (Accuracy): {mejor_acc:.3f} ({mejor_acc*100:.1f}%)
+K Óptimo encontrado: {mejor_k}
+K utilizado: {resultados[mejor]['k']}
+Ponderación: {resultados[mejor]['weights']}
 
 BÚSQUEDA DE K ÓPTIMO:
-- Rango evaluado: {min(k_values)} - {max(k_values)}
-- Mejor score CV: {mejor_cv_score:.3f}
+- Mejor K encontrado: {mejor_k}
+- Mejor score CV: {max(cv_scores):.3f}
 
-COMPARACIÓN DE CONFIGURACIONES:
+COMPARACIÓN CONFIGURACIONES:
 """
-        for nombre, resultado in resultados.items():
-            reporte_completo += f"\n{nombre}:"
-            reporte_completo += f"\n  - Precisión: {resultado['precision']:.3f}"
-            reporte_completo += f"\n  - K: {resultado['k']}"
-            reporte_completo += f"\n  - Weights: {resultado['weights']}"
-        
-        if 'stats_dist' in locals():
-            reporte_completo += f"""
+    for nombre, res in resultados.items():
+        reporte += f"\n{nombre}:"
+        reporte += f"\n  - Precisión: {res['accuracy']:.3f}"
+        reporte += f"\n  - K: {res['k']}"
+        reporte += f"\n  - Weights: {res['weights']}"
+    
+    # Métricas detalladas por clase
+    reporte_sklearn = classification_report(y_test, y_pred_mejor, output_dict=True)
+    reporte += f"\n\nMÉTRICAS POR CLASE ({mejor}):\n"
+    clases = resultados[mejor]['modelo'].classes_
+    for clase in clases:
+        if clase in reporte_sklearn:
+            prec = reporte_sklearn[clase]['precision']
+            rec = reporte_sklearn[clase]['recall']
+            f1 = reporte_sklearn[clase]['f1-score']
+            support = reporte_sklearn[clase]['support']
+            reporte += f"{clase}: Precision={prec:.3f}, Recall={rec:.3f}, F1={f1:.3f}, N={support}\n"
+    
+    reporte += f"""
+DATOS UTILIZADOS:
+- Total registros: {total_registros:,}
+- Variables: {', '.join(variables)}
+- División: 70% entrenamiento, 30% prueba
 
-ANÁLISIS DE DISTANCIAS:
-- Distancia promedio: {stats_dist['promedio']:.3f}
-- Distancia mediana: {stats_dist['mediana']:.3f}
-- Desviación estándar: {stats_dist['std']:.3f}
-- Rango: [{stats_dist['min']:.3f}, {stats_dist['max']:.3f}]
+CONFIGURACIÓN K-NN:
+- Métrica de distancia: Euclidiana
+- Escalado aplicado: StandardScaler
+- Validación cruzada: 5-fold para encontrar K óptimo
+
+PRINCIPIO K-NN:
+- Clasifica según la mayoría de los K vecinos más cercanos
+- No requiere entrenamiento (lazy learning)
+- Se adapta automáticamente a nuevos datos
+- Sensible a la escala de las variables (por eso se escala)
+
+VENTAJAS:
+- Simple de entender e implementar
+- No hace suposiciones sobre la distribución de datos
+- Funciona bien con datos no lineales
+- Se adapta a cambios en los datos
+
+DESVENTAJAS:
+- Computacionalmente costoso para predicción
+- Sensible al ruido y datos irrelevantes
+- Sufre con alta dimensionalidad
+- Requiere mucha memoria
+
+APLICACIONES:
+- Sistemas de recomendación
+- Reconocimiento de patrones
+- Clasificación de imágenes
+- Análisis de similitud
 """
-        
-        reporte_completo += f"""
+    
+    with open('results/reportes/clasificacion_knn_reporte.txt', 'w', encoding='utf-8') as f:
+        f.write(reporte)
 
-VARIABLES UTILIZADAS:
-{', '.join(variables_disponibles)}
-
-DATOS:
-- Total registros: {len(datos_limpios):,}
-- Variables predictoras: {len(variables_disponibles)}
-- Categorías: {len(clases)}
-- Entrenamiento: {len(X_train):,}
-- Prueba: {len(X_test):,}
-
-NOTAS:
-- Los datos fueron escalados usando StandardScaler
-- Se utilizó distancia Euclidiana
-- Se aplicó validación cruzada para encontrar K óptimo
-"""
-        
-        with open('/home/sedc/Proyectos/MineriaDeDatos/results/reportes/clasificacion_knn_reporte.txt', 'w', encoding='utf-8') as f:
-            f.write(reporte_completo)
-        
-        print("💾 Modelo guardado en: results/modelos/mejor_knn_clasificacion.pkl")
-        print("💾 Scaler guardado en: results/modelos/scaler_knn.pkl")
-        print("📄 Reporte guardado en: results/reportes/clasificacion_knn_reporte.txt")
-        
-    except Exception as e:
-        print(f"⚠️ Error guardando archivos: {e}")
+def ejecutar_clasificacion_ejemplares():
+    """Función principal"""
+    print("👥 CLASIFICACIÓN BASADA EN EJEMPLARES (K-NN)")
+    print("="*45)
     
-    # 15. RESUMEN FINAL
-    print()
-    print("📝 RESUMEN K-NN (BASADO EN EJEMPLARES):")
-    print(f"   • Mejor configuración: K={resultados[mejor_nombre]['k']}, weights={resultados[mejor_nombre]['weights']}")
-    print(f"   • Precisión alcanzada: {mejor_precision*100:.1f}%")
-    print(f"   • K óptimo encontrado: {mejor_k}")
+    # Cargar y preparar datos
+    datos = cargar_datos()
+    X, y, variables = preparar_datos(datos)
     
-    if mejor_precision > 0.8:
-        print("   • ¡Excelente clasificación por similitud! 🎉")
-    elif mejor_precision > 0.6:
-        print("   • Buena clasificación basada en vecinos 👍")
-    else:
-        print("   • Clasificación moderada, considerar más datos 🔧")
+    print(f"📊 Datos: {len(X):,} registros")
+    print(f"📊 Variables: {', '.join(variables)}")
     
-    print("   • Ventaja: No requiere entrenamiento, se adapta a nuevos datos")
-    print("   • Desventaja: Computacionalmente costoso para predicción")
+    # División train/test
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.3, random_state=42, stratify=y
+    )
     
-    print("✅ CLASIFICACIÓN BASADA EN EJEMPLARES COMPLETADA")
-    return resultados
+    # Encontrar K óptimo
+    print("\n🔍 Buscando K óptimo...")
+    mejor_k, mejor_cv_score, k_values, cv_scores = encontrar_k_optimo(X_train, y_train)
+    print(f"    ✅ Mejor K: {mejor_k} (CV Score: {mejor_cv_score:.3f})")
+    
+    # Entrenar modelos K-NN
+    print("\n👥 Entrenando modelos K-NN...")
+    resultados, scaler = entrenar_modelos_knn(X_train, X_test, y_train, y_test, mejor_k)
+    
+    if not resultados:
+        print("❌ No se pudieron entrenar modelos K-NN")
+        return
+    
+    # Mostrar resultados
+    print("\nRESULTADOS:")
+    for nombre, res in resultados.items():
+        print(f"{nombre:25}: Accuracy = {res['accuracy']:.3f} ({res['accuracy']*100:.1f}%)")
+    
+    # Mejor modelo
+    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
+    print(f"\n🏆 MEJOR: {mejor}")
+    print(f"    Precisión: {resultados[mejor]['accuracy']:.3f}")
+    print(f"    K utilizado: {resultados[mejor]['k']}")
+    print(f"    Ponderación: {resultados[mejor]['weights']}")
+    
+    # Análisis de vecinos
+    analizar_vecinos(resultados[mejor]['modelo'], scaler.transform(X_test), 
+                    y_test, resultados[mejor]['predicciones'])
+    
+    # Visualizar resultados
+    visualizar_resultados_knn(resultados, y_test, k_values, cv_scores, mejor_k)
+    
+    # Guardar resultados
+    guardar_resultados_knn(resultados, variables, len(X), mejor_k, cv_scores, y_test)
+    
+    print("\n✅ COMPLETADO")
+    
+    return {
+        'mejor_modelo': mejor,
+        'precision': resultados[mejor]['accuracy'],
+        'k_optimo': mejor_k,
+        'resultados': resultados
+    }
 
 if __name__ == "__main__":
     ejecutar_clasificacion_ejemplares()
