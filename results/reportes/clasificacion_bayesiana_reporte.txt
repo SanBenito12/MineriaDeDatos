@@ -1,57 +1,20 @@
-CLASIFICACIÓN BAYESIANA - REPORTE
-================================
 
-MEJOR MODELO: Multinomial Naive Bayes
-Descripción: Para conteos y frecuencias
-Precisión (Accuracy): 0.999 (99.9%)
+REPORTE CLASIFICACIÓN BAYESIANA
+==============================
 
-COMPARACIÓN MODELOS:
+MEJOR MODELO: Gaussiano Naive Bayes
+Precisión: 0.905 (90.5%)
 
-Gaussiano NB:
-  - Precisión: 0.978
-  - Descripción: Asume distribución normal
-Multinomial NB:
-  - Precisión: 0.999
-  - Descripción: Para conteos y frecuencias
-Bernoulli NB:
-  - Precisión: 0.970
-  - Descripción: Para características binarias
+DATOS PROCESADOS:
+- Registros: 5,000
+- Variables: 9
+- Entrenamiento: 3,500
+- Prueba: 1,500
 
-PROBABILIDADES A PRIORI:
-P(Pequeña) = 0.998 (99.8%)
-P(Mediana) = 0.001 (0.1%)
-P(Grande) = 0.000 (0.0%)
+VARIABLES UTILIZADAS:
+POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS, GRAPROES, PEA, POCUPADA
 
-MÉTRICAS POR CLASE (Multinomial):
-Pequeña: Precision=0.999, Recall=1.000, F1=0.999, N=20695.0
-Mediana: Precision=0.000, Recall=0.000, F1=0.000, N=31.0
-
-ANÁLISIS DE CONFIANZA:
-Pequeña: Confianza promedio = 0.999, Predicciones = 20726
-
-DATOS UTILIZADOS:
-- Total registros: 69,084
-- Variables: POBFEM, POBMAS, TOTHOG, VIVTOT, P_15YMAS, P_60YMAS, GRAPROES, PEA, POCUPADA, PDESOCUP
-- División: 70% entrenamiento, 30% prueba
-
-PRINCIPIO BAYESIANO:
-- Usa el Teorema de Bayes: P(Clase|Datos) = P(Datos|Clase) × P(Clase) / P(Datos)
+INTERPRETACIÓN:
+- Usa probabilidades para clasificar poblaciones
 - Asume independencia entre variables (naive)
-- Calcula probabilidades en lugar de dar respuestas definitivas
-
-TIPOS DE NAIVE BAYES:
-- Gaussiano: Para variables continuas con distribución normal
-- Multinomial: Para conteos y frecuencias (ej: palabras en texto)
-- Bernoulli: Para características binarias (presencia/ausencia)
-
-VENTAJAS:
-- Rápido y eficiente
-- Funciona bien con pocos datos
-- Proporciona probabilidades de clasificación
-- Robusto al ruido
-
-APLICACIONES:
-- Filtros de spam
-- Análisis de sentimientos
-- Diagnóstico médico
-- Clasificación de documentos
+- Eficiente y rápido para datos grandes

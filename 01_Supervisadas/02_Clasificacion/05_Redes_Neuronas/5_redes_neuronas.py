@@ -1,66 +1,81 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-REDES NEURONALES - Clasificación con MLPClassifier
+REDES NEURONALES - CLASIFICACIÓN (Versión Optimizada)
+Redes neuronales artificiales para clasificar poblaciones
 """
 
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
 
-def cargar_datos():
-    """Carga el dataset principal"""
-    return pd.read_csv('data/ceros_sin_columnasAB_limpio_weka.csv')
-
-def crear_categorias_poblacion(poblacion):
-    """Crea categorías balanceadas para redes neuronales"""
-    if poblacion <= 200:
-        return 'Pequeña'
-    elif poblacion <= 800:
-        return 'Mediana'
-    elif poblacion <= 3000:
-        return 'Grande'
-    else:
-        return 'Muy_Grande'
-
-def preparar_datos(datos, max_muestras=3000):
-    """Prepara variables para redes neuronales"""
-    variables = ['POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT', 'P_15YMAS', 'P_60YMAS', 'GRAPROES', 'PEA', 'POCUPADA']
-    variables_disponibles = [v for v in variables if v in datos.columns]
+def crear_categorias_poblacion_dinamica(datos):
+    """Crear categorías balanceadas basadas en cuartiles"""
+    q1 = datos['POBTOT'].quantile(0.25)
+    q2 = datos['POBTOT'].quantile(0.50)
+    q3 = datos['POBTOT'].quantile(0.75)
     
-    # Crear variable objetivo categórica
-    datos['CATEGORIA_POB'] = datos['POBTOT'].apply(crear_categorias_poblacion)
+    def categorizar(poblacion):
+        if poblacion <= q1:
+            return 'Pequeña'
+        elif poblacion <= q2:
+            return 'Mediana'
+        elif poblacion <= q3:
+            return 'Grande'
+        else:
+            return 'Muy_Grande'
     
-    # Dataset limpio
-    df = datos[variables_disponibles + ['CATEGORIA_POB']].dropna()
+    return categorizar
+
+def preparar_datos_redes(datos):
+    """Prepara datos específicamente para redes neuronales"""
+    variables_predictoras = [
+        'POBFEM', 'POBMAS', 'TOTHOG', 'VIVTOT', 'P_15YMAS', 
+        'P_60YMAS', 'GRAPROES', 'PEA', 'POCUPADA'
+    ]
+    
+    variables_disponibles = [v for v in variables_predictoras if v in datos.columns]
+    
+    if len(variables_disponibles) < 5:
+        return None, None, None
+    
+    # Crear categorías dinámicas
+    categorizador = crear_categorias_poblacion_dinamica(datos)
+    datos['CATEGORIA_POB'] = datos['POBTOT'].apply(categorizador)
+    
+    # Limpiar datos
+    datos_limpios = datos[variables_disponibles + ['CATEGORIA_POB']].dropna()
     
     # Muestreo estratificado para balancear clases
-    if len(df) > max_muestras:
+    if len(datos_limpios) > 5000:
         try:
-            df, _ = train_test_split(df, test_size=1-max_muestras/len(df), 
-                                   stratify=df['CATEGORIA_POB'], random_state=42)
+            datos_limpios = datos_limpios.groupby('CATEGORIA_POB').apply(
+                lambda x: x.sample(min(len(x), 1250), random_state=42)
+            ).reset_index(drop=True)
         except:
-            df = df.sample(n=max_muestras, random_state=42)
-        
-        print(f"📝 Muestra balanceada: {len(df):,} registros")
+            datos_limpios = datos_limpios.sample(n=5000, random_state=42)
     
-    # Verificar distribución de clases
-    print(f"📊 Distribución de clases:")
-    for categoria, count in df['CATEGORIA_POB'].value_counts().items():
-        print(f"   {categoria}: {count:,} ({count/len(df)*100:.1f}%)")
+    # Convertir variables a tipo numérico
+    for var in variables_disponibles:
+        datos_limpios[var] = pd.to_numeric(datos_limpios[var], errors='coerce')
     
-    X = df[variables_disponibles]
-    y = df['CATEGORIA_POB']
+    # Eliminar filas con NaN después de conversión
+    datos_limpios = datos_limpios.dropna()
+    
+    X = datos_limpios[variables_disponibles]
+    y = datos_limpios['CATEGORIA_POB']
     
     return X, y, variables_disponibles
 
 def crear_arquitecturas_redes():
-    """Define diferentes arquitecturas de redes neuronales"""
+    """Define diferentes arquitecturas de redes neuronales optimizadas"""
     return {
         'Red Simple': {
             'hidden_layer_sizes': (20,),
@@ -88,58 +103,6 @@ def crear_arquitecturas_redes():
         }
     }
 
-def entrenar_redes_neuronales(X_train, X_test, y_train, y_test):
-    """Entrena diferentes arquitecturas de redes neuronales"""
-    
-    # Escalar datos (CRÍTICO para redes neuronales)
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
-    
-    arquitecturas = crear_arquitecturas_redes()
-    resultados = {}
-    
-    for nombre, config in arquitecturas.items():
-        try:
-            print(f"    Entrenando {nombre}...")
-            
-            # Crear configuración sin descripción
-            config_modelo = {k: v for k, v in config.items() if k != 'descripcion'}
-            config_modelo['random_state'] = 42
-            
-            # Crear y entrenar modelo
-            modelo = MLPClassifier(**config_modelo)
-            modelo.fit(X_train_scaled, y_train)
-            
-            # Predicciones
-            y_pred = modelo.predict(X_test_scaled)
-            y_pred_proba = modelo.predict_proba(X_test_scaled)
-            
-            # Calcular número de parámetros
-            n_parametros = calcular_parametros_red(modelo, X_train_scaled.shape[1])
-            
-            # Métricas
-            resultados[nombre] = {
-                'modelo': modelo,
-                'accuracy': accuracy_score(y_test, y_pred),
-                'predicciones': y_pred,
-                'probabilidades': y_pred_proba,
-                'arquitectura': config['hidden_layer_sizes'],
-                'activacion': config['activation'],
-                'descripcion': config['descripcion'],
-                'n_parametros': n_parametros,
-                'convergencia': {
-                    'convergio': modelo.n_iter_ < modelo.max_iter,
-                    'iteraciones': modelo.n_iter_
-                }
-            }
-            
-        except Exception as e:
-            print(f"    ❌ Error en {nombre}: {str(e)[:60]}...")
-            continue
-    
-    return resultados, scaler
-
 def calcular_parametros_red(modelo, n_entrada):
     """Calcula número aproximado de parámetros en la red"""
     try:
@@ -160,137 +123,173 @@ def calcular_parametros_red(modelo, n_entrada):
     except:
         return 0
 
-def visualizar_resultados_redes(resultados, y_test, variables):
-    """Crea visualizaciones de redes neuronales"""
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+def entrenar_redes_neuronales(X_train, X_test, y_train, y_test):
+    """Entrena diferentes arquitecturas de redes neuronales"""
     
-    # 1. Comparación de accuracy
-    nombres = list(resultados.keys())
-    accuracies = [resultados[m]['accuracy'] for m in nombres]
+    # Escalar datos (CRÍTICO para redes neuronales)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
     
-    axes[0,0].bar(nombres, accuracies, color=['lightblue', 'lightgreen', 'orange'])
-    axes[0,0].set_title('Precisión por Arquitectura')
-    axes[0,0].set_ylabel('Accuracy')
-    axes[0,0].tick_params(axis='x', rotation=45)
-    for i, acc in enumerate(accuracies):
-        axes[0,0].text(i, acc + 0.01, f'{acc:.3f}', ha='center')
+    arquitecturas = crear_arquitecturas_redes()
+    resultados = {}
     
-    # 2. Matriz de confusión (mejor modelo)
-    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
-    y_pred_mejor = resultados[mejor]['predicciones']
+    for nombre, config in arquitecturas.items():
+        try:
+            # Crear configuración sin descripción
+            config_modelo = {k: v for k, v in config.items() if k != 'descripcion'}
+            config_modelo['random_state'] = 42
+            
+            # Crear y entrenar modelo
+            modelo = MLPClassifier(**config_modelo)
+            modelo.fit(X_train_scaled, y_train)
+            
+            # Predicciones
+            y_pred = modelo.predict(X_test_scaled)
+            y_pred_proba = modelo.predict_proba(X_test_scaled)
+            
+            # Calcular número de parámetros
+            n_parametros = calcular_parametros_red(modelo, X_train_scaled.shape[1])
+            
+            # Análisis de convergencia
+            convergencia = {
+                'convergio': modelo.n_iter_ < modelo.max_iter,
+                'iteraciones': modelo.n_iter_,
+                'loss_curve': getattr(modelo, 'loss_curve_', None)
+            }
+            
+            # Métricas
+            precision = accuracy_score(y_test, y_pred)
+            
+            resultados[nombre] = {
+                'modelo': modelo,
+                'precision': precision,
+                'predicciones': y_pred,
+                'probabilidades': y_pred_proba,
+                'arquitectura': config['hidden_layer_sizes'],
+                'activacion': config['activation'],
+                'descripcion': config['descripcion'],
+                'n_parametros': n_parametros,
+                'convergencia': convergencia
+            }
+            
+        except Exception as e:
+            continue
     
-    cm = confusion_matrix(y_test, y_pred_mejor)
-    clases = resultados[mejor]['modelo'].classes_
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                xticklabels=clases, yticklabels=clases, ax=axes[0,1])
-    axes[0,1].set_title(f'Matriz de Confusión\n{mejor}')
-    axes[0,1].set_xlabel('Predicción')
-    axes[0,1].set_ylabel('Real')
-    
-    # 3. Complejidad vs Precisión
-    n_params = [resultados[m]['n_parametros'] for m in nombres]
-    axes[0,2].scatter(n_params, accuracies, s=100, alpha=0.7, 
-                     c=['red', 'green', 'blue'][:len(n_params)])
-    for i, nombre in enumerate(nombres):
-        axes[0,2].annotate(nombre.split()[1], (n_params[i], accuracies[i]), 
-                          xytext=(5, 5), textcoords='offset points', fontsize=8)
-    axes[0,2].set_xlabel('Número de Parámetros')
-    axes[0,2].set_ylabel('Precisión')
-    axes[0,2].set_title('Complejidad vs Precisión')
-    
-    # 4. Distribución de confianza
-    probabilidades = resultados[mejor]['probabilidades']
-    max_probs = np.max(probabilidades, axis=1)
-    axes[1,0].hist(max_probs, bins=15, alpha=0.7, color='purple', edgecolor='black')
-    axes[1,0].set_title('Distribución de Confianza')
-    axes[1,0].set_xlabel('Confianza Máxima')
-    axes[1,0].set_ylabel('Frecuencia')
-    
-    # 5. Arquitectura del mejor modelo
-    mejor_arq = resultados[mejor]['arquitectura']
-    if isinstance(mejor_arq, int):
-        mejor_arq = (mejor_arq,)
-    
-    capas = [len(variables)] + list(mejor_arq) + [len(clases)]
-    
-    x_pos = np.arange(len(capas))
-    axes[1,1].bar(x_pos, capas, color=['blue', 'green', 'orange', 'red'][:len(capas)])
-    axes[1,1].set_title(f'Arquitectura Mejor Red\n{mejor}')
-    axes[1,1].set_xlabel('Capa')
-    axes[1,1].set_ylabel('Neuronas')
-    axes[1,1].set_xticks(x_pos)
-    
-    etiquetas = ['Entrada'] + [f'Oculta {i+1}' for i in range(len(mejor_arq))] + ['Salida']
-    axes[1,1].set_xticklabels(etiquetas, rotation=45)
-    
-    for i, neurons in enumerate(capas):
-        axes[1,1].text(i, neurons + max(capas)*0.02, str(neurons), ha='center', fontweight='bold')
-    
-    # 6. Convergencia por modelo
-    convergencias = []
-    for nombre in nombres:
-        conv_info = resultados[nombre]['convergencia']
-        convergencias.append(conv_info['iteraciones'])
-    
-    axes[1,2].bar(nombres, convergencias, color='cyan')
-    axes[1,2].set_title('Iteraciones de Convergencia')
-    axes[1,2].set_ylabel('Iteraciones')
-    axes[1,2].tick_params(axis='x', rotation=45)
-    
-    for i, iter_val in enumerate(convergencias):
-        axes[1,2].text(i, iter_val + max(convergencias)*0.02, str(iter_val), ha='center')
-    
-    plt.tight_layout()
-    plt.savefig('results/graficos/redes_neuronas.png', dpi=150, bbox_inches='tight')
-    plt.show()
+    return resultados, scaler
 
-def guardar_resultados_redes(resultados, variables, total_registros, y_test):
-    """Guarda reporte de redes neuronales"""
-    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
-    mejor_acc = resultados[mejor]['accuracy']
-    y_pred_mejor = resultados[mejor]['predicciones']
-    
-    reporte = f"""REDES NEURONALES - CLASIFICACIÓN
-===============================
+def crear_visualizaciones_redes(resultados, y_test, variables_disponibles):
+    """Crear visualizaciones esenciales para redes neuronales"""
+    try:
+        fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+        fig.suptitle('🧠 REDES NEURONALES - ANÁLISIS', fontsize=14, fontweight='bold')
+        
+        # Gráfico 1: Comparación de precisión por arquitectura
+        nombres = list(resultados.keys())
+        precisiones = [resultados[m]['precision'] for m in nombres]
+        
+        axes[0].bar(nombres, precisiones, color=['lightblue', 'lightgreen', 'orange'])
+        axes[0].set_title('🧠 Precisión por Arquitectura', fontweight='bold')
+        axes[0].set_ylabel('Precisión')
+        axes[0].tick_params(axis='x', rotation=45)
+        axes[0].set_ylim(0, 1)
+        
+        # Añadir valores en las barras
+        for i, precision in enumerate(precisiones):
+            axes[0].text(i, precision + 0.02, f'{precision:.3f}', ha='center', fontweight='bold')
+        
+        # Gráfico 2: Matriz de confusión del mejor modelo
+        mejor_nombre = max(resultados.keys(), key=lambda x: resultados[x]['precision'])
+        y_pred_mejor = resultados[mejor_nombre]['predicciones']
+        clases = resultados[mejor_nombre]['modelo'].classes_
+        
+        cm = confusion_matrix(y_test, y_pred_mejor)
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                   xticklabels=clases, yticklabels=clases, ax=axes[1])
+        axes[1].set_title(f'🎯 Matriz de Confusión\n{mejor_nombre}', fontweight='bold')
+        axes[1].set_xlabel('Predicción')
+        axes[1].set_ylabel('Real')
+        
+        # Gráfico 3: Arquitectura del mejor modelo
+        mejor_arq = resultados[mejor_nombre]['arquitectura']
+        if isinstance(mejor_arq, int):
+            mejor_arq = (mejor_arq,)
+        
+        capas = [len(variables_disponibles)] + list(mejor_arq) + [len(clases)]
+        
+        x_pos = np.arange(len(capas))
+        axes[2].bar(x_pos, capas, color=['blue', 'green', 'orange', 'red'][:len(capas)])
+        axes[2].set_title(f'🏗️ Arquitectura\n{mejor_nombre}', fontweight='bold')
+        axes[2].set_xlabel('Capa')
+        axes[2].set_ylabel('Neuronas')
+        axes[2].set_xticks(x_pos)
+        
+        etiquetas = ['Entrada'] + [f'Oculta {i+1}' for i in range(len(mejor_arq))] + ['Salida']
+        axes[2].set_xticklabels(etiquetas, rotation=45, ha='right')
+        
+        # Añadir valores en las barras
+        for i, neurons in enumerate(capas):
+            axes[2].text(i, neurons + max(capas)*0.02, str(neurons), ha='center', fontweight='bold')
+        
+        plt.tight_layout()
+        plt.savefig('/home/sedc/Proyectos/MineriaDeDatos/results/graficos/redes_neuronas.png', 
+                   dpi=150, bbox_inches='tight')
+        plt.show()
+        
+        return True
+        
+    except Exception as e:
+        return False
 
-MEJOR RED: {mejor}
-Descripción: {resultados[mejor]['descripcion']}
-Precisión (Accuracy): {mejor_acc:.3f} ({mejor_acc*100:.1f}%)
-Arquitectura: {resultados[mejor]['arquitectura']}
-Activación: {resultados[mejor]['activacion']}
-Parámetros totales: {resultados[mejor]['n_parametros']:,}
+def guardar_resultados_redes(resultados, variables_disponibles, datos_info):
+    """Guardar modelo y reporte de manera optimizada"""
+    try:
+        import joblib
+        
+        # Mejor modelo
+        mejor_nombre = max(resultados.keys(), key=lambda x: resultados[x]['precision'])
+        mejor_modelo = resultados[mejor_nombre]['modelo']
+        mejor_precision = resultados[mejor_nombre]['precision']
+        
+        # Guardar modelo
+        joblib.dump(mejor_modelo, '/home/sedc/Proyectos/MineriaDeDatos/results/modelos/mejor_red_neuronal.pkl')
+        
+        # Crear reporte conciso
+        reporte = f"""
+REPORTE REDES NEURONALES - CLASIFICACIÓN
+=======================================
 
-COMPARACIÓN ARQUITECTURAS:
+MEJOR RED: {mejor_nombre}
+Descripción: {resultados[mejor_nombre]['descripcion']}
+Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)
+Arquitectura: {resultados[mejor_nombre]['arquitectura']}
+Activación: {resultados[mejor_nombre]['activacion']}
+Parámetros totales: {resultados[mejor_nombre]['n_parametros']:,}
+
+COMPARACIÓN DE ARQUITECTURAS:
 """
-    for nombre, res in resultados.items():
-        conv_info = res['convergencia']
-        status = "✅ Convergió" if conv_info['convergio'] else "⚠️ No convergió"
-        reporte += f"\n{nombre}:"
-        reporte += f"\n  - Precisión: {res['accuracy']:.3f}"
-        reporte += f"\n  - Arquitectura: {res['arquitectura']}"
-        reporte += f"\n  - Activación: {res['activacion']}"
-        reporte += f"\n  - Parámetros: {res['n_parametros']:,}"
-        reporte += f"\n  - Convergencia: {status} ({conv_info['iteraciones']} iter)"
-    
-    # Métricas detalladas por clase
-    reporte_sklearn = classification_report(y_test, y_pred_mejor, output_dict=True)
-    reporte += f"\n\nMÉTRICAS POR CLASE ({mejor}):\n"
-    clases = resultados[mejor]['modelo'].classes_
-    for clase in clases:
-        if clase in reporte_sklearn:
-            prec = reporte_sklearn[clase]['precision']
-            rec = reporte_sklearn[clase]['recall']
-            f1 = reporte_sklearn[clase]['f1-score']
-            support = reporte_sklearn[clase]['support']
-            reporte += f"{clase}: Precision={prec:.3f}, Recall={rec:.3f}, F1={f1:.3f}, N={support}\n"
-    
-    reporte += f"""
-DATOS UTILIZADOS:
-- Total registros: {total_registros:,}
-- Variables: {', '.join(variables)}
-- División: 70% entrenamiento, 30% prueba
+        for nombre, resultado in resultados.items():
+            convergencia = resultado['convergencia']
+            status = "✅ Convergió" if convergencia['convergio'] else "⚠️ No convergió"
+            reporte += f"\n{nombre}:"
+            reporte += f"\n  - Precisión: {resultado['precision']:.3f}"
+            reporte += f"\n  - Arquitectura: {resultado['arquitectura']}"
+            reporte += f"\n  - Activación: {resultado['activacion']}"
+            reporte += f"\n  - Parámetros: {resultado['n_parametros']:,}"
+            reporte += f"\n  - Convergencia: {status} ({convergencia['iteraciones']} iter)"
+        
+        reporte += f"""
 
-CONFIGURACIÓN REDES:
+DATOS PROCESADOS:
+- Registros: {datos_info['n_registros']:,}
+- Variables: {len(variables_disponibles)}
+- Entrenamiento: {datos_info['n_train']:,}
+- Prueba: {datos_info['n_test']:,}
+
+VARIABLES UTILIZADAS:
+{', '.join(variables_disponibles)}
+
+CONFIGURACIÓN:
 - Escalado aplicado: StandardScaler
 - Solver: lbfgs (optimización limitada)
 - Regularización: L2 (alpha)
@@ -302,62 +301,71 @@ PRINCIPIO REDES NEURONALES:
 - Aprende patrones complejos no lineales
 - Backpropagation para ajustar pesos
 
-FUNCIONES DE ACTIVACIÓN:
-- ReLU: f(x) = max(0, x) - elimina negativos
-- Tanh: f(x) = tanh(x) - salida entre -1 y 1
-- Cada una captura diferentes tipos de patrones
-
 VENTAJAS:
 - Puede aprender patrones muy complejos
 - Versátil para diferentes tipos de problemas
 - Buena capacidad de generalización
-- Funciona bien con grandes datasets
 
 DESVENTAJAS:
 - "Caja negra" - difícil de interpretar
-- Requiere mucho ajuste de hiperparámetros
+- Requiere ajuste de hiperparámetros
 - Sensible al overfitting
-- Computacionalmente intensivo
-
-APLICACIONES:
-- Reconocimiento de imágenes
-- Procesamiento de lenguaje natural
-- Diagnóstico médico
-- Predicción financiera
-- Sistemas de recomendación
 """
-    
-    with open('results/reportes/redes_neuronas_reporte.txt', 'w', encoding='utf-8') as f:
-        f.write(reporte)
+        
+        with open('/home/sedc/Proyectos/MineriaDeDatos/results/reportes/redes_neuronas_reporte.txt', 'w', encoding='utf-8') as f:
+            f.write(reporte)
+        
+        return True
+        
+    except Exception as e:
+        return False
 
 def ejecutar_redes_neuronas():
-    """Función principal"""
+    """FUNCIÓN PRINCIPAL - Mantiene compatibilidad con menú"""
     print("🧠 REDES NEURONALES - CLASIFICACIÓN")
     print("="*40)
     
-    # Cargar y preparar datos
-    datos = cargar_datos()
-    X, y, variables = preparar_datos(datos)
+    # 1. CARGAR DATOS
+    archivo = '/home/sedc/Proyectos/MineriaDeDatos/data/ceros_sin_columnasAB_limpio_weka.csv'
+    try:
+        datos = pd.read_csv(archivo)
+        print(f"✅ Datos cargados: {datos.shape[0]:,} registros")
+    except Exception as e:
+        print(f"❌ Error cargando datos: {e}")
+        return
     
-    print(f"📊 Datos: {len(X):,} registros")
-    print(f"📊 Variables: {', '.join(variables)}")
-    print(f"🔢 Neuronas entrada: {len(variables)}")
+    # 2. PREPARAR VARIABLES
+    X, y, variables_disponibles = preparar_datos_redes(datos)
+    if X is None:
+        print("❌ No hay suficientes variables para redes neuronales")
+        return
+    
+    print(f"📊 Variables: {len(variables_disponibles)} | Datos limpios: {len(X):,}")
+    print(f"🔢 Neuronas entrada: {len(variables_disponibles)}")
     print(f"🎯 Clases salida: {len(y.unique())}")
     
-    # División train/test
+    # Mostrar distribución de categorías
+    distribucion = y.value_counts()
+    print("📈 Categorías:")
+    for categoria, count in distribucion.items():
+        print(f"   {categoria}: {count:,} ({count/len(y)*100:.1f}%)")
+    
+    # 3. DIVIDIR DATOS
     try:
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.3, random_state=42, stratify=y
         )
-        print(f"📊 División estratificada realizada")
-    except:
+        print(f"📊 División estratificada: {len(X_train):,} entrenamiento | {len(X_test):,} prueba")
+    except ValueError:
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.3, random_state=42
         )
-        print(f"📊 División simple realizada")
+        print(f"📊 División simple: {len(X_train):,} entrenamiento | {len(X_test):,} prueba")
     
-    # Entrenar redes neuronales
-    print(f"\n🧠 Entrenando redes neuronales...")
+    print()
+    
+    # 4. ENTRENAR REDES NEURONALES
+    print("🧠 Entrenando redes neuronales...")
     resultados, scaler = entrenar_redes_neuronales(X_train, X_test, y_train, y_test)
     
     if not resultados:
@@ -365,38 +373,70 @@ def ejecutar_redes_neuronas():
         return
     
     # Mostrar resultados
-    print("\nRESULTADOS:")
-    for nombre, res in resultados.items():
-        conv_status = "✅" if res['convergencia']['convergio'] else "⚠️"
-        print(f"{nombre:15}: Accuracy = {res['accuracy']:.3f} ({res['accuracy']*100:.1f}%) {conv_status}")
+    for nombre, resultado in resultados.items():
+        convergencia = resultado['convergencia']
+        conv_status = "✅" if convergencia['convergio'] else "⚠️"
+        print(f"   {nombre:15} → Precisión: {resultado['precision']:.3f} ({resultado['precision']*100:.1f}%) {conv_status}")
     
-    # Mejor modelo
-    mejor = max(resultados.keys(), key=lambda x: resultados[x]['accuracy'])
-    print(f"\n🏆 MEJOR: {mejor}")
-    print(f"    Precisión: {resultados[mejor]['accuracy']:.3f}")
-    print(f"    Arquitectura: {resultados[mejor]['arquitectura']}")
-    print(f"    Parámetros: {resultados[mejor]['n_parametros']:,}")
+    # 5. ENCONTRAR MEJOR MODELO
+    mejor_nombre = max(resultados.keys(), key=lambda x: resultados[x]['precision'])
+    mejor_precision = resultados[mejor_nombre]['precision']
     
-    conv_mejor = resultados[mejor]['convergencia']
-    if conv_mejor['convergio']:
-        print(f"    ✅ Convergió en {conv_mejor['iteraciones']} iteraciones")
+    print()
+    print(f"🏆 MEJOR RED: {mejor_nombre}")
+    print(f"   Descripción: {resultados[mejor_nombre]['descripcion']}")
+    print(f"   Precisión: {mejor_precision:.3f} ({mejor_precision*100:.1f}%)")
+    print(f"   Arquitectura: {resultados[mejor_nombre]['arquitectura']}")
+    print(f"   Parámetros: {resultados[mejor_nombre]['n_parametros']:,}")
+    
+    # Información de convergencia
+    convergencia_mejor = resultados[mejor_nombre]['convergencia']
+    if convergencia_mejor['convergio']:
+        print(f"   ✅ Convergió en {convergencia_mejor['iteraciones']} iteraciones")
     else:
-        print(f"    ⚠️ No convergió completamente")
+        print(f"   ⚠️ No convergió completamente ({convergencia_mejor['iteraciones']} iter)")
     
-    # Visualizar resultados
-    visualizar_resultados_redes(resultados, y_test, variables)
+    # 6. ANÁLISIS DETALLADO
+    y_pred_mejor = resultados[mejor_nombre]['predicciones']
+    reporte = classification_report(y_test, y_pred_mejor, output_dict=True)
     
-    # Guardar resultados
-    guardar_resultados_redes(resultados, variables, len(X), y_test)
+    print("\n🎯 Métricas por categoría:")
+    for categoria in y.unique():
+        if categoria in reporte:
+            precision = reporte[categoria]['precision']
+            recall = reporte[categoria]['recall']
+            f1 = reporte[categoria]['f1-score']
+            print(f"   {categoria:12}: Prec={precision:.3f} | Rec={recall:.3f} | F1={f1:.3f}")
     
-    print("✅ COMPLETADO")
+    # 7. VISUALIZACIONES
+    crear_visualizaciones_redes(resultados, y_test, variables_disponibles)
     
-    return {
-        'mejor_modelo': mejor,
-        'precision': resultados[mejor]['accuracy'],
-        'arquitectura': resultados[mejor]['arquitectura'],
-        'resultados': resultados
+    # 8. GUARDAR RESULTADOS
+    datos_info = {
+        'n_registros': len(X),
+        'n_train': len(X_train),
+        'n_test': len(X_test)
     }
+    
+    guardar_resultados_redes(resultados, variables_disponibles, datos_info)
+    
+    # 9. RESUMEN FINAL
+    print()
+    print("📝 RESUMEN:")
+    print(f"   • Mejor arquitectura: {resultados[mejor_nombre]['arquitectura']}")
+    print(f"   • Función activación: {resultados[mejor_nombre]['activacion']}")
+    print(f"   • Precisión: {mejor_precision*100:.1f}%")
+    print(f"   • Parámetros: {resultados[mejor_nombre]['n_parametros']:,}")
+    
+    if mejor_precision > 0.8:
+        print("   🎉 ¡Excelente aprendizaje neuronal!")
+    elif mejor_precision > 0.65:
+        print("   👍 Buen aprendizaje de la red neuronal")
+    else:
+        print("   🔧 Aprendizaje moderado")
+    
+    print("✅ REDES NEURONALES COMPLETADAS")
+    return resultados
 
 if __name__ == "__main__":
     ejecutar_redes_neuronas()
