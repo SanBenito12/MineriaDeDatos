@@ -1,0 +1,65 @@
+TÉCNICAS GENÉTICAS - CLASIFICACIÓN
+=================================
+
+RESULTADO DE EVOLUCIÓN:
+Fitness final: 0.978
+Precisión evolutiva: 1.000 (100.0%)
+Precisión base: 1.000 (100.0%)
+
+OPTIMIZACIÓN DE CARACTERÍSTICAS:
+Variables originales: 9
+Variables seleccionadas: 2
+Reducción: 77.8%
+
+VARIABLES SELECCIONADAS:
+- POBMAS
+- P_15YMAS
+
+COMPARACIÓN:
+- Modelo base (todas): 1.000 con 9 variables
+- Modelo evolutivo: 1.000 con 2 variables
+- Ratio eficiencia: 1.000x rendimiento con 0.222x variables
+
+MÉTRICAS POR CLASE (MODELO EVOLUTIVO):
+
+CONFIGURACIÓN GENÉTICA:
+- Población: 30 individuos
+- Generaciones: 20
+- Probabilidad mutación: 0.15
+- Selección: Torneo de 3
+- Cruce: Un punto
+- Elitismo: Mejor individuo conservado
+
+PROCESO EVOLUTIVO:
+- Cada individuo representa selección de variables
+- Fitness = precisión - penalización por complejidad
+- Evolución hacia soluciones más eficientes
+- Búsqueda automática del subconjunto óptimo
+
+PRINCIPIOS ALGORITMOS GENÉTICOS:
+- Inspirados en evolución natural
+- Población de soluciones candidatas
+- Selección de los más aptos
+- Reproducción con cruce y mutación
+- Mejora gradual a través de generaciones
+
+VENTAJAS:
+- Optimización global (evita mínimos locales)
+- No requiere gradientes o derivadas
+- Maneja espacios de búsqueda complejos
+- Paralelizable naturalmente
+
+DESVENTAJAS:
+- Computacionalmente costoso
+- No garantiza encontrar el óptimo global
+- Muchos hiperparámetros a ajustar
+- Convergencia puede ser lenta
+
+APLICACIONES:
+- Selección de características en ML
+- Optimización de hiperparámetros
+- Diseño de redes neuronales
+- Planificación de rutas
+- Diseño de horarios
+- Optimización financiera
+- Ingeniería de diseño
