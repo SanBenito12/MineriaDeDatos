@@ -219,6 +219,11 @@ def ejecutar_clustering_numerico():
                         'efectividad': mejor_silhouette_temp
                     }
                     
+                    # PARADA TEMPRANA: Si ya supera 80%, no seguir probando
+                    if mejor_silhouette_temp >= 0.80:
+                        print(f"   🎉 ¡OBJETIVO ALCANZADO! Parando búsqueda en {estrategia['nombre']}")
+                        break
+                    
             except Exception as e:
                 continue
     
@@ -381,7 +386,9 @@ def ejecutar_clustering_numerico():
                         'silhouette': silhouette,
                         'calinski': calinski,
                         'davies': davies,
-                        'n_clusters': len(np.unique(labels[labels != -1]))
+                        'n_clusters': len(np.unique(labels[labels != -1])),
+                        'datos_originales': datos_limpios,
+                        'nombre': nombre
                     }
             except:
                 continue
@@ -419,12 +426,14 @@ def ejecutar_clustering_numerico():
             'silhouette': efectividad_final,
             'calinski': calinski_harabasz_score(datos_escalados, labels_temp),
             'davies': davies_bouldin_score(datos_escalados, labels_temp),
-            'n_clusters': k_optimo
+            'n_clusters': k_optimo,
+            'datos_originales': datos_limpios,
+            'nombre': mejor_nombre
         }
         resultados = {mejor_nombre: mejor_resultado}
 
     
-    # 6. OPTIMIZACIÓN FINAL ULTRA-AGRESIVA
+    # 6. OPTIMIZACIÓN FINAL ULTRA-AGRESIVA (solo si no alcanzó 80%)
     if efectividad_final < 0.80:
         print(f"🔥 BÚSQUEDA EXHAUSTIVA FINAL - necesita {(0.80-efectividad_final)*100:.1f}% más...")
         
@@ -434,7 +443,7 @@ def ejecutar_clustering_numerico():
         mejor_algoritmo_final = mejor_nombre
         
         k_max_final = min(40, len(datos_limpios)//30)  # Hasta 40 clusters
-        print(f"   🔍 Probando K=2 hasta K={k_max_final}...")
+        print(f"   🔍 Búsqueda final: K=2 hasta K={k_max_final}...")
         
         for k_final in range(2, k_max_final):
             # Múltiples algoritmos con máxima configuración
@@ -466,13 +475,15 @@ def ejecutar_clustering_numerico():
                             'silhouette': efectividad_test,
                             'calinski': calinski_harabasz_score(datos_escalados, labels_final),
                             'davies': davies_bouldin_score(datos_escalados, labels_final),
-                            'n_clusters': k_final
+                            'n_clusters': k_final,
+                            'datos_originales': datos_limpios,
+                            'nombre': nombre_alg
                         }
                         
                         print(f"      🎯 Nuevo mejor: {efectividad_test:.3f} con {nombre_alg}, K={k_final}")
                         
                         if efectividad_test >= 0.80:  # ¡Encontrado!
-                            print(f"      🎉 ¡OBJETIVO ALCANZADO! {efectividad_test:.3f} ≥ 0.80")
+                            print(f"      🎉 ¡OBJETIVO ALCANZADO! {efectividad_test:.3f} ≥ 0.80 - PARANDO BÚSQUEDA")
                             break
                 except Exception as e:
                     continue
@@ -483,6 +494,8 @@ def ejecutar_clustering_numerico():
         efectividad_final = mejor_efectividad_final
         k_optimo = mejor_k_final
         mejor_nombre = mejor_algoritmo_final
+    else:
+        print("🎉 Ya alcanzó 80%+ - omitiendo búsqueda exhaustiva final")
     
     print(f"🏆 {mejor_nombre} ({estrategia_usada})")
     print(f"📊 Clusters: {mejor_resultado['n_clusters']} | Efectividad: {efectividad_final:.3f} ({efectividad_final*100:.1f}%)")
@@ -527,91 +540,167 @@ def ejecutar_clustering_numerico():
 
 def crear_visualizaciones_clustering(X, mejor_resultado, variables, k_range, silhouette_scores, 
                                    k_optimo, todos_resultados):
-    """Crea visualizaciones completas para clustering numérico"""
+    """Crea visualizaciones especializadas para clustering numérico"""
     try:
-        fig, axes = plt.subplots(2, 3, figsize=(18, 12))
-        fig.suptitle('📊 CLUSTERING NUMÉRICO - TÉCNICAS NO SUPERVISADAS', fontsize=16, fontweight='bold')
+        fig, axes = plt.subplots(2, 4, figsize=(20, 10))
+        fig.suptitle('📊 CLUSTERING NUMÉRICO - ANÁLISIS TÉCNICO COMPLETO', fontsize=16, fontweight='bold')
         
         labels = mejor_resultado['labels']
+        n_clusters = len(np.unique(labels[labels != -1])) if -1 in labels else len(np.unique(labels))
         
-        # 1. PCA - VISUALIZACIÓN PRINCIPAL
+        # 1. CLUSTERS EN ESPACIO PCA (Principal)
         pca = PCA(n_components=2, random_state=42)
         X_pca = pca.fit_transform(X)
         
-        scatter = axes[0,0].scatter(X_pca[:, 0], X_pca[:, 1], c=labels, cmap='viridis', alpha=0.7, s=40)
-        axes[0,0].set_title(f'🎯 Clusters en Espacio PCA\n{mejor_resultado["n_clusters"]} clusters identificados', 
-                           fontweight='bold')
+        scatter = axes[0,0].scatter(X_pca[:, 0], X_pca[:, 1], c=labels, cmap='tab10', alpha=0.7, s=30)
+        axes[0,0].set_title(f'🎯 Clusters en Espacio PCA\n{n_clusters} clusters identificados', fontweight='bold')
         axes[0,0].set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)')
         axes[0,0].set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)')
-        plt.colorbar(scatter, ax=axes[0,0])
+        plt.colorbar(scatter, ax=axes[0,0], label='Cluster')
         
-        # 2. MÉTODO DEL CODO
-        axes[0,1].plot(k_range, silhouette_scores, 'bo-', linewidth=2, markersize=8)
-        axes[0,1].axvline(x=k_optimo, color='red', linestyle='--', label=f'K óptimo = {k_optimo}')
-        axes[0,1].set_title('📈 Análisis del Número Óptimo de Clusters', fontweight='bold')
+        # 2. ANÁLISIS K ÓPTIMO (Método del Codo + Silhouette)
+        axes[0,1].plot(k_range, silhouette_scores, 'bo-', linewidth=2, markersize=6, label='Silhouette')
+        axes[0,1].axvline(x=k_optimo, color='red', linestyle='--', linewidth=2, label=f'K óptimo = {k_optimo}')
+        axes[0,1].axhline(y=0.8, color='green', linestyle=':', alpha=0.7, label='Objetivo 80%')
+        axes[0,1].set_title('📈 Optimización del Número de Clusters', fontweight='bold')
         axes[0,1].set_xlabel('Número de Clusters (K)')
         axes[0,1].set_ylabel('Silhouette Score')
         axes[0,1].legend()
         axes[0,1].grid(True, alpha=0.3)
         
-        # 3. COMPARACIÓN DE ALGORITMOS
-        nombres_alg = list(todos_resultados.keys())
-        silhouettes = [todos_resultados[m]['silhouette'] for m in nombres_alg]
+        # 3. CENTROIDES Y SEPARACIÓN DE CLUSTERS
+        if hasattr(mejor_resultado['algoritmo'], 'cluster_centers_'):
+            centroides = mejor_resultado['algoritmo'].cluster_centers_
+            # Proyectar centroides al espacio PCA
+            centroides_pca = pca.transform(centroides)
+            axes[0,2].scatter(X_pca[:, 0], X_pca[:, 1], c=labels, cmap='tab10', alpha=0.4, s=20)
+            axes[0,2].scatter(centroides_pca[:, 0], centroides_pca[:, 1], 
+                            c='red', marker='X', s=200, linewidths=3, label='Centroides')
+            axes[0,2].set_title('🎯 Centroides de Clusters', fontweight='bold')
+            axes[0,2].set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)')
+            axes[0,2].set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)')
+            axes[0,2].legend()
+        else:
+            # Para clustering jerárquico, mostrar separación
+            from scipy.spatial.distance import pdist, squareform
+            if len(X) <= 1000:  # Solo para muestras pequeñas
+                distancias = pdist(X_pca)
+                matriz_dist = squareform(distancias)
+                im = axes[0,2].imshow(matriz_dist, cmap='viridis', aspect='auto')
+                axes[0,2].set_title('🌡️ Matriz de Distancias', fontweight='bold')
+                plt.colorbar(im, ax=axes[0,2])
+            else:
+                axes[0,2].text(0.5, 0.5, f'Matriz de distancias\n(muestra muy grande)\n{len(X):,} puntos', 
+                              ha='center', va='center', transform=axes[0,2].transAxes)
+                axes[0,2].set_title('🌡️ Matriz de Distancias', fontweight='bold')
         
-        colores = ['lightblue', 'lightgreen', 'orange', 'pink'][:len(nombres_alg)]
-        barras = axes[0,2].bar(nombres_alg, silhouettes, color=colores)
-        axes[0,2].set_title('⚖️ Comparación de Algoritmos', fontweight='bold')
-        axes[0,2].set_ylabel('Silhouette Score')
-        axes[0,2].tick_params(axis='x', rotation=45)
+        # 4. DISTRIBUCIÓN DE CLUSTERS (Mejorada)
+        unique_labels, counts = np.unique(labels[labels != -1], return_counts=True) if -1 in labels else np.unique(labels, return_counts=True)
+        colores = plt.cm.tab10(np.linspace(0, 1, len(unique_labels)))
         
-        for i, (barra, score) in enumerate(zip(barras, silhouettes)):
-            axes[0,2].text(i, score + 0.01, f'{score:.3f}', ha='center', fontweight='bold')
+        wedges, texts, autotexts = axes[0,3].pie(counts, labels=[f'C{i}' for i in unique_labels], 
+                                                autopct='%1.1f%%', startangle=90, colors=colores)
+        axes[0,3].set_title('📊 Distribución de Clusters', fontweight='bold')
         
-        # 4. DISTRIBUCIÓN DE CLUSTERS
-        unique_labels, counts = np.unique(labels[labels != -1], return_counts=True)
-        axes[1,0].pie(counts, labels=[f'Cluster {i}' for i in unique_labels], 
-                     autopct='%1.1f%%', startangle=90)
-        axes[1,0].set_title('📊 Distribución de Clusters', fontweight='bold')
+        # 5. COMPARACIÓN DE ALGORITMOS (Mejorada)
+        if todos_resultados:
+            nombres_alg = list(todos_resultados.keys())
+            silhouettes = [todos_resultados[m]['silhouette'] for m in nombres_alg]
+            
+            # Ordenar por efectividad
+            algoritmos_ordenados = sorted(zip(nombres_alg, silhouettes), key=lambda x: x[1], reverse=True)
+            nombres_ord, sil_ord = zip(*algoritmos_ordenados)
+            
+            colores_bar = ['green' if s >= 0.8 else 'orange' if s >= 0.6 else 'red' for s in sil_ord]
+            barras = axes[1,0].barh(range(len(nombres_ord)), sil_ord, color=colores_bar)
+            axes[1,0].set_title('⚖️ Ranking de Algoritmos', fontweight='bold')
+            axes[1,0].set_xlabel('Silhouette Score')
+            axes[1,0].set_yticks(range(len(nombres_ord)))
+            axes[1,0].set_yticklabels([n.replace(' ', '\n') for n in nombres_ord], fontsize=8)
+            axes[1,0].axvline(x=0.8, color='green', linestyle='--', alpha=0.7, label='80%')
+            
+            # Añadir valores
+            for i, (barra, score) in enumerate(zip(barras, sil_ord)):
+                axes[1,0].text(score + 0.01, i, f'{score:.3f}', va='center', fontweight='bold')
         
-        # 5. HEATMAP DE MÉTRICAS
-        metricas_data = []
-        algoritmos_nombres = []
+        # 6. DISTRIBUCIÓN DE VARIABLES POR CLUSTER (BoxPlot)
+        if len(variables) >= 2:
+            # Usar las 2 variables más importantes (si están disponibles)
+            datos_orig = mejor_resultado.get('datos_originales', None)
+            if datos_orig is not None and len(variables) >= 2:
+                var_principal = variables[0]
+                datos_con_clusters = datos_orig.copy()
+                datos_con_clusters['Cluster'] = labels
+                
+                clusters_validos = [c for c in np.unique(labels) if c != -1]
+                datos_plot = [datos_con_clusters[datos_con_clusters['Cluster'] == c][var_principal].values 
+                            for c in clusters_validos]
+                
+                bp = axes[1,1].boxplot(datos_plot, labels=[f'C{c}' for c in clusters_validos], patch_artist=True)
+                for patch, color in zip(bp['boxes'], colores[:len(clusters_validos)]):
+                    patch.set_facecolor(color)
+                axes[1,1].set_title(f'📦 Distribución de {var_principal[:10]}\npor Cluster', fontweight='bold')
+                axes[1,1].set_ylabel(var_principal)
+            else:
+                axes[1,1].text(0.5, 0.5, 'Distribución\nde Variables\n(datos no disponibles)', 
+                              ha='center', va='center', transform=axes[1,1].transAxes)
+                axes[1,1].set_title('📦 Distribución por Cluster', fontweight='bold')
         
-        for nombre, resultado in todos_resultados.items():
-            metricas_data.append([
-                resultado['silhouette'],
-                resultado['calinski']/1000,  # Normalizar
-                1/resultado['davies'] if resultado['davies'] != 0 else 0  # Invertir (mayor es mejor)
-            ])
-            algoritmos_nombres.append(nombre)
+        # 7. MÉTRICAS DE CALIDAD (Expandida)
+        metricas_nombres = ['Silhouette', 'Calinski-H', 'Davies-B⁻¹']
+        metricas_valores = [
+            mejor_resultado['silhouette'],
+            mejor_resultado['calinski']/1000,  # Normalizar
+            1/mejor_resultado['davies'] if mejor_resultado['davies'] != 0 else 0
+        ]
         
-        metricas_df = pd.DataFrame(metricas_data, 
-                                  columns=['Silhouette', 'Calinski/1000', '1/Davies'],
-                                  index=algoritmos_nombres)
+        colores_metricas = ['green' if mejor_resultado['silhouette'] >= 0.8 else 'orange', 'blue', 'purple']
+        barras_met = axes[1,2].bar(range(len(metricas_nombres)), metricas_valores, color=colores_metricas)
+        axes[1,2].set_title('📊 Métricas de Calidad', fontweight='bold')
+        axes[1,2].set_ylabel('Valor (normalizado)')
+        axes[1,2].set_xticks(range(len(metricas_nombres)))
+        axes[1,2].set_xticklabels(metricas_nombres)
         
-        sns.heatmap(metricas_df, annot=True, cmap='YlOrRd', fmt='.3f', ax=axes[1,1])
-        axes[1,1].set_title('🔥 Heatmap de Métricas de Calidad', fontweight='bold')
+        # Añadir valores reales
+        for i, (barra, valor) in enumerate(zip(barras_met, metricas_valores)):
+            if i == 0:  # Silhouette
+                texto = f'{mejor_resultado["silhouette"]:.3f}'
+            elif i == 1:  # Calinski
+                texto = f'{mejor_resultado["calinski"]:.0f}'
+            else:  # Davies
+                texto = f'{mejor_resultado["davies"]:.3f}'
+            axes[1,2].text(i, valor + max(metricas_valores)*0.02, texto, ha='center', fontweight='bold')
         
-        # 6. ANÁLISIS DE COMPONENTES PRINCIPALES
-        # Mostrar contribución de variables a las componentes
-        loadings = pca.components_.T * np.sqrt(pca.explained_variance_)
+        # 8. RESUMEN TÉCNICO COMPLETO
+        axes[1,3].text(0.05, 0.95, '🏆 CLUSTERING NUMÉRICO', fontsize=14, fontweight='bold', color='darkblue')
+        axes[1,3].text(0.05, 0.85, f'Algoritmo: {mejor_resultado.get("nombre", "N/A")}', fontsize=11)
+        axes[1,3].text(0.05, 0.8, f'Clusters: {n_clusters}', fontsize=11)
+        axes[1,3].text(0.05, 0.75, f'Muestras: {len(X):,}', fontsize=11)
+        axes[1,3].text(0.05, 0.7, f'Variables: {len(variables)}', fontsize=11)
         
-        variables_plot = variables[:6]  # Primeras 6 para claridad
-        for i, var in enumerate(variables_plot):
-            if i < len(loadings):
-                axes[1,2].arrow(0, 0, loadings[i, 0], loadings[i, 1], 
-                               head_width=0.05, head_length=0.05, fc='red', ec='red')
-                axes[1,2].text(loadings[i, 0]*1.15, loadings[i, 1]*1.15, var[:8], 
-                              fontsize=9, ha='center', va='center')
+        axes[1,3].text(0.05, 0.6, '📊 MÉTRICAS:', fontsize=12, fontweight='bold')
+        axes[1,3].text(0.05, 0.55, f'Silhouette: {mejor_resultado["silhouette"]:.3f}', fontsize=10)
+        axes[1,3].text(0.05, 0.5, f'Calinski-H: {mejor_resultado["calinski"]:.0f}', fontsize=10)
+        axes[1,3].text(0.05, 0.45, f'Davies-B: {mejor_resultado["davies"]:.3f}', fontsize=10)
         
-        circle = plt.Circle((0,0), 1, fill=False, linestyle='--', alpha=0.5)
-        axes[1,2].add_patch(circle)
-        axes[1,2].set_xlim(-1.2, 1.2)
-        axes[1,2].set_ylim(-1.2, 1.2)
-        axes[1,2].set_xlabel('PC1')
-        axes[1,2].set_ylabel('PC2')
-        axes[1,2].set_title('🧮 Contribución de Variables\na Componentes Principales', fontweight='bold')
-        axes[1,2].grid(True, alpha=0.3)
+        axes[1,3].text(0.05, 0.35, '📋 TOP VARIABLES:', fontsize=11, fontweight='bold')
+        for i, var in enumerate(variables[:4]):  # Top 4 variables
+            axes[1,3].text(0.1, 0.3 - i*0.04, f'• {var}', fontsize=9)
+        
+        # Estado del cumplimiento
+        efectividad = mejor_resultado['silhouette']
+        if efectividad >= 0.80:
+            axes[1,3].text(0.05, 0.12, '✅ REQUISITO CUMPLIDO', fontsize=12, fontweight='bold', color='green')
+            axes[1,3].text(0.05, 0.07, f'{efectividad*100:.1f}% ≥ 80%', fontsize=11, color='green')
+        else:
+            axes[1,3].text(0.05, 0.12, '❌ NO CUMPLE REQUISITO', fontsize=12, fontweight='bold', color='red')
+            axes[1,3].text(0.05, 0.07, f'Falta: {(0.8-efectividad)*100:.1f}%', fontsize=11, color='red')
+        
+        axes[1,3].text(0.05, 0.02, f'🎯 K-óptimo: {k_optimo} clusters', fontsize=10, style='italic')
+        
+        axes[1,3].set_xlim(0, 1)
+        axes[1,3].set_ylim(0, 1)
+        axes[1,3].axis('off')
         
         plt.tight_layout()
         
@@ -622,7 +711,7 @@ def crear_visualizaciones_clustering(X, mejor_resultado, variables, k_range, sil
         plt.savefig(ruta_grafico, dpi=150, bbox_inches='tight')
         plt.show()
         
-        print(f"💾 Gráficos: results/graficos/clustering_numerico.png")
+        print(f"💾 Gráficos especializados: results/graficos/clustering_numerico.png")
         
     except Exception as e:
         print(f"⚠️ Error en visualizaciones: {e}")
